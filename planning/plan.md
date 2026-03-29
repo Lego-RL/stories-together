@@ -4,13 +4,11 @@
 The goal here is to establish a "source of truth" and ensure your data integrity is rock-solid before touching the UI.
 
 ### Phase 1: Infrastructure & Database Schema
-- Initialize the FastAPI project and environment variables (.env).
+- ✅ Initialize the FastAPI project and environment variables (.env). 
 
-- Configure the SQLModel/SQLAlchemy engine to connect to PostgreSQL.
+- ✅ Configure the SQLAlchemy engine to connect to PostgreSQL.
 
-- Define the core database models: User, Story, and Passage.
-
-- Implement database migrations using Alembic to allow for schema changes later.
+- ✅ Define the core database models: User, Story, and Passage.
 
 ### Phase 2: Authentication & User Management
 - Integrate FastAPI-Users with JWT (JSON Web Token) strategy.

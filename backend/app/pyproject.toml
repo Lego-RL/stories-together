@@ -11,6 +11,8 @@ dependencies = [
     "fastapi-users[sqlalchemy]>=13.0.0", # Auth system compatible with SQLAlchemy
     "python-dotenv>=1.0.1",        # Environment management
     "pydantic-settings>=2.2.0",    # Configuration management
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
 ]
 
 [dependency-groups]
