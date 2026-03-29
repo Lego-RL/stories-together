@@ -1,10 +1,20 @@
 import datetime
 from typing import List, Optional
 
+from pydantic import BaseModel
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
 Base = declarative_base()
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
 
 
 class User(Base):
@@ -50,7 +60,7 @@ class Passage(Base):
     story_id: Mapped[int] = mapped_column(ForeignKey("stories.id"), index=True)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    # self-referencing foreign Key for story having branching paths 
+    # self-referencing foreign Key for story having branching paths
     parent_passage_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("passages.id"), index=True
     )

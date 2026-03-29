@@ -8,11 +8,13 @@ dependencies = [
     "fastapi[standard]>=0.115.0",  # FastAPI framework
     "sqlalchemy>=2.0.30",          # Core ORM
     "pydantic[email]>=2.7.0",      # Data validation & settings
-    "fastapi-users[sqlalchemy]>=13.0.0", # Auth system compatible with SQLAlchemy
+    # Auth system compatible with SQLAlchemy
     "python-dotenv>=1.0.1",        # Environment management
     "pydantic-settings>=2.2.0",    # Configuration management
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
+    "pyjwt[crypto]>=2.12.1",
+    "pwdlib[argon2]>=0.3.0",
 ]
 
 [dependency-groups]
