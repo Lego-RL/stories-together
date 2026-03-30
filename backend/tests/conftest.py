@@ -9,9 +9,9 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-load_dotenv()
-
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
+# load test environment variables
+load_dotenv(dotenv_path="tests/.env.test")
+TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
