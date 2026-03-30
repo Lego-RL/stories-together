@@ -11,13 +11,13 @@ The goal here is to establish a "source of truth" and ensure your data integrity
 - ✅ Define the core database models: User, Story, and Passage.
 
 ### Phase 2: Authentication & User Management
-- Integrate FastAPI-Users with JWT (JSON Web Token) strategy.
+- ✅ Implement JWT (JSON Web Token) session authorization functionality.
 
-- Create the /auth/register and /auth/login endpoints.
+- ✅ Create the /auth/register and /auth/login endpoints.
 
-- Implement a "Current User" dependency to protect sensitive routes.
+- ✅ Implement a "Current User" dependency to protect sensitive routes.
 
-- Test user creation and token validation via the built-in Swagger UI (/docs).
+- ✅ Test user creation and token validation via the built-in Swagger UI (/docs).
 
 ### Phase 3: Story Lifecycle Endpoints
 - Create POST /stories to allow users to start a new collaborative thread.

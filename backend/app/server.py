@@ -1,6 +1,7 @@
 import uvicorn
-from app.routes.user_auth import auth_router
 from fastapi import FastAPI
+
+from .routes.user_auth import auth_router
 
 app = FastAPI(
     title="Stories Together API", description="API for Stories Together Applications"

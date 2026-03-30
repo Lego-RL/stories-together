@@ -3,12 +3,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
-from app.db.models import TokenData, User
-from app.repositories import user as user_repo
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
+
+from ..db.models import TokenData, User
+from . import user as user_repo
 
 # load secret key for JWT tokens from .env
 SECRET_KEY = os.getenv("SECRET_KEY", "your-fallback-secret-for-dev")

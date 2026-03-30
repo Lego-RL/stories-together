@@ -1,6 +1,8 @@
-from sqlalchemy import select, or_
-from app.db.models import User
-from app.db.session import SessionLocal
+from sqlalchemy import or_, select
+
+from ..db.models import User
+from ..db.session import SessionLocal
+
 
 async def get_user_by_username_or_email(username: str, email: str) -> User | None:
     async with SessionLocal() as db:
@@ -8,11 +10,13 @@ async def get_user_by_username_or_email(username: str, email: str) -> User | Non
         result = await db.execute(query)
         return result.scalar_one_or_none()
 
+
 async def get_user_by_username(username: str) -> User | None:
     async with SessionLocal() as db:
         query = select(User).where(User.username == username)
         result = await db.execute(query)
         return result.scalar_one_or_none()
+
 
 async def create_user(user_data: dict) -> User:
     async with SessionLocal() as db:

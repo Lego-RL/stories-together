@@ -3,12 +3,14 @@ from typing import AsyncGenerator
 
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 # create database connection
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_async_engine(DATABASE_URL, echo=True)
+# engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 
 SessionLocal = async_sessionmaker(
     bind=engine, autocommit=False, autoflush=False, expire_on_commit=False
