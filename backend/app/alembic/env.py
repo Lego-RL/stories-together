@@ -3,12 +3,15 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
-from db.models import Base
+from app.db.models import Base
 from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+# upgrade test db
+# load_dotenv("../tests/.env.test")
+# upgrade main db
 load_dotenv()
 
 # this is the Alembic Config object, which provides

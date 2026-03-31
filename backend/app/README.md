@@ -8,3 +8,9 @@
 - `routes` handles the FastAPI endpoints
 - `services` handles business logic
 - `repositories` handles database queries / access functionality
+
+
+## Managing Alembic & Database version
+- `alembic current` to see current alembic database version
+- `alembic upgrade head` to upgrade to newest version
+- `alembic (up/down)grade (+/-)2` for relative upgrade/downgrades

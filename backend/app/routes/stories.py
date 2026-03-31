@@ -59,3 +59,10 @@ async def get_passage_linear_path(passage_id: int):
 @story_router.get("/{id}/tree", response_model=List[PassageTree])
 async def get_story_narrative_tree(id: int):
     return await passage_repo.get_story_tree(story_id=id)
+
+
+@story_router.get("/search", response_model=List[StoryRead])
+async def search_stories(q: str):
+    if len(q) < 3:
+        return []
+    return await story_repo.search_stories_by_title(query=q)

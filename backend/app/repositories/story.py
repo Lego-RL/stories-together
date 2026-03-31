@@ -1,6 +1,6 @@
 from app.db.models import Passage, Story
 from app.db.session import SessionLocal
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 
 async def create_story_with_first_passage(
@@ -32,4 +32,18 @@ async def get_all_stories(skip: int = 0, limit: int = 10):
             select(Story).offset(skip).limit(limit).order_by(Story.created_at.desc())
         )
         result = await db.execute(query)
+        return result.scalars().all()
+
+
+async def search_stories_by_title(query: str, limit: int = 5):
+    async with SessionLocal() as db:
+        stmt = (
+            select(Story)
+            .where(Story.title.ilike(f"%{query}%"))
+            .order_by(
+                func.similarity(Story.title, query).desc()
+            )  # Use similarity function from pg_trgm postgres extension
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
         return result.scalars().all()

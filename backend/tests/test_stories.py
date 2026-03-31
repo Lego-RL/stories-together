@@ -1,6 +1,15 @@
 import pytest
 from httpx import AsyncClient
 
+SEARCH_TEST_DATA = [
+    # (query, expected_count, fragment_of_title_expected)
+    ("Dragon", 1, "The Dragon's Echo"),
+    ("Echo", 2, "Echoes"),  # should find "The Dragon's Echo" and "Echoes of the Past"
+    ("the", 3, "The"),  # case-insensitive "the" matches 3 titles
+    ("Zebra", 0, None),  # no matches
+    ("Dr", 0, None),  # below 3-character threshold
+]
+
 
 @pytest.mark.asyncio
 async def test_create_story_authenticated(client: AsyncClient):
@@ -96,34 +105,75 @@ async def test_get_linear_path(client, login_user):
     auth = login_user["headers"]
 
     # sample story
-    story_res = await client.post("/stories/", json={
-        "title": "Path Test", 
-        "first_passage_content": "Level 1"
-    }, headers=auth)
+    story_res = await client.post(
+        "/stories/",
+        json={"title": "Path Test", "first_passage_content": "Level 1"},
+        headers=auth,
+    )
     story_id = story_res.json()["id"]
-    
+
     # get initial passage id
     tree = await client.get(f"/stories/{story_id}/tree")
     root_id = tree.json()[0]["id"]
 
     # make child passage
-    child_res = await client.post(f"/stories/{story_id}/passages", json={
-        "content": "Level 2", "parent_passage_id": root_id
-    }, headers=auth)
+    child_res = await client.post(
+        f"/stories/{story_id}/passages",
+        json={"content": "Level 2", "parent_passage_id": root_id},
+        headers=auth,
+    )
     child_id = child_res.json()["id"]
 
     # make grandchild passage
-    grandchild_res = await client.post(f"/stories/{story_id}/passages", json={
-        "content": "Level 3", "parent_passage_id": child_id
-    }, headers=auth)
+    grandchild_res = await client.post(
+        f"/stories/{story_id}/passages",
+        json={"content": "Level 3", "parent_passage_id": child_id},
+        headers=auth,
+    )
     grandchild_id = grandchild_res.json()["id"]
 
     # find path for grandchild
     path_res = await client.get(f"/stories/passages/{grandchild_id}/path")
-    
+
     assert path_res.status_code == 200
     path_data = path_res.json()
     assert len(path_data) == 3
     assert path_data[0]["content"] == "Level 1"
     assert path_data[1]["content"] == "Level 2"
     assert path_data[2]["content"] == "Level 3"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("query, expected_count, title_fragment", SEARCH_TEST_DATA)
+async def test_story_search_logic(
+    client: AsyncClient, login_user, query, expected_count, title_fragment
+):
+    auth = login_user["headers"]
+
+    # sample stories
+    stories_to_seed = [
+        {"title": "The Dragon's Echo", "first_passage_content": "Once upon a time..."},
+        {"title": "The Infinite Loop", "first_passage_content": "While True:"},
+        {
+            "title": "Echoes of the Past",
+            "first_passage_content": "The history is deep...",
+        },
+        {"title": "Crimson Skies", "first_passage_content": "The clouds were red."},
+    ]
+
+    for story in stories_to_seed:
+        await client.post("/stories/", json=story, headers=auth)
+
+    # perform search
+    response = await client.get("/stories/search", params={"q": query})
+
+    assert response.status_code == 200
+    results = response.json()
+    print(results)
+
+    assert len(results) == expected_count
+
+    if expected_count > 0:
+        # see if expected fragment is present in at least one of the titles
+        titles = [s["title"] for s in results]
+        assert any(title_fragment.lower() in t.lower() for t in titles)
