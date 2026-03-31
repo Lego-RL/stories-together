@@ -20,11 +20,11 @@ The goal here is to establish a "source of truth" and ensure your data integrity
 - ✅ Test user creation and token validation via the built-in Swagger UI (/docs).
 
 ### Phase 3: Story Lifecycle Endpoints
-- Create POST /stories to allow users to start a new collaborative thread.
+- ✅ Create POST /stories to allow users to start a new collaborative thread.
 
-- Create GET /stories with basic pagination to list available stories.
+- ✅ Create GET /stories with basic pagination to list available stories.
 
-- Implement logic to ensure every new story is initialized with its first "root" passage.
+- ✅ Implement logic to ensure every new story is initialized with its first initial passage.
 
 ### Phase 4: Passage Submission & Branching Logic
 - Create POST /stories/{id}/passages to handle contributions.

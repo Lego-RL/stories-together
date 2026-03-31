@@ -18,6 +18,9 @@ from sqlalchemy.pool import NullPool
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_test_db():
+    """
+    Provide a test database client to utilize during testing
+    """
 
     test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 
@@ -39,7 +42,35 @@ async def setup_test_db():
 
 @pytest_asyncio.fixture(scope="session")
 async def client():
+    """
+    Provide AsyncClient to send test requests to API
+    """
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
+
+
+@pytest_asyncio.fixture(scope="function")
+async def login_user(client: AsyncClient):
+    """
+    Use with endpoints that expect a user to be logged in.
+    Returns dict of login endpoint response `user` and constructed auth header `headers`.
+    """
+
+    # create user
+    user_creds = {
+        "username": "happy_user",
+        "email": "happy_user@smile.com",
+        "password": "secret_password",
+    }
+    await client.post("/auth/register", params=user_creds)
+
+    # login, get token back
+    login_res = await client.post(
+        "/auth/login",
+        data={"username": user_creds["username"], "password": user_creds["password"]},
+    )
+    token = login_res.json()["access_token"]
+
+    return {"user": login_res.json(), "headers": {"Authorization": f"Bearer {token}"}}
