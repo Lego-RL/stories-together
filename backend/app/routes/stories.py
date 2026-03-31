@@ -6,7 +6,7 @@ from app.repositories import story as story_repo
 from app.repositories.auth import get_current_user
 from app.schemas.passage import PassageCreate, PassageRead, PassageTree
 from app.schemas.story import StoryCreate, StoryRead
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 story_router = APIRouter(prefix="/stories", tags=["stories"])
 
@@ -42,6 +42,18 @@ async def add_passage_to_story(
         parent_passage_id=passage_in.parent_passage_id,
         author_id=current_user.id,
     )
+
+
+@story_router.get("/passages/{passage_id}/path", response_model=List[PassageRead])
+async def get_passage_linear_path(passage_id: int):
+    """
+    Returns the chronological list of passages leading up to (and including)
+    the specified passage_id.
+    """
+    path = await passage_repo.get_passage_path(passage_id=passage_id)
+    if not path:
+        raise HTTPException(status_code=404, detail="Passage path not found")
+    return path
 
 
 @story_router.get("/{id}/tree", response_model=List[PassageTree])

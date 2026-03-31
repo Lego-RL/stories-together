@@ -89,3 +89,41 @@ async def test_add_passage_to_story(client, login_user):
     assert data["content"] == passage_payload["content"]
     assert data["parent_passage_id"] == root_passage_id
     assert data["story_id"] == story_id
+
+
+@pytest.mark.asyncio
+async def test_get_linear_path(client, login_user):
+    auth = login_user["headers"]
+
+    # sample story
+    story_res = await client.post("/stories/", json={
+        "title": "Path Test", 
+        "first_passage_content": "Level 1"
+    }, headers=auth)
+    story_id = story_res.json()["id"]
+    
+    # get initial passage id
+    tree = await client.get(f"/stories/{story_id}/tree")
+    root_id = tree.json()[0]["id"]
+
+    # make child passage
+    child_res = await client.post(f"/stories/{story_id}/passages", json={
+        "content": "Level 2", "parent_passage_id": root_id
+    }, headers=auth)
+    child_id = child_res.json()["id"]
+
+    # make grandchild passage
+    grandchild_res = await client.post(f"/stories/{story_id}/passages", json={
+        "content": "Level 3", "parent_passage_id": child_id
+    }, headers=auth)
+    grandchild_id = grandchild_res.json()["id"]
+
+    # find path for grandchild
+    path_res = await client.get(f"/stories/passages/{grandchild_id}/path")
+    
+    assert path_res.status_code == 200
+    path_data = path_res.json()
+    assert len(path_data) == 3
+    assert path_data[0]["content"] == "Level 1"
+    assert path_data[1]["content"] == "Level 2"
+    assert path_data[2]["content"] == "Level 3"

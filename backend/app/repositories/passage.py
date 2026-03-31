@@ -3,12 +3,15 @@ from app.db.session import SessionLocal
 from app.schemas.passage import PassageRead
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import aliased
 
 
 async def create_passage(
     story_id: int, content: str, parent_passage_id: int, author_id: int
 ) -> Passage:
-    """ """
+    """
+    Uses passage information to create new passage & add to the database.
+    """
     async with SessionLocal() as db:
         # ensure parent passage exists, is tied to same story
         query = select(Passage).where(
@@ -38,7 +41,42 @@ async def create_passage(
         return PassageRead.model_validate(new_passage)
 
 
-async def get_story_tree(story_id: int):
+async def get_passage_path(passage_id: int) -> list[PassageRead]:
+    """
+    Return a list of passages in linear, chronological order.
+    """
+    async with SessionLocal() as db:
+        # use recursive CTE to construct entire passage path
+        # start with the specific passage requested
+        recursive_cte = (
+            select(Passage)
+            .where(Passage.id == passage_id)
+            .cte(name="passage_path", recursive=True)
+        )
+
+        # join the CTE with the Passage table to find parent passages
+        recursive_cte = recursive_cte.union_all(
+            select(Passage).join(
+                recursive_cte, Passage.id == recursive_cte.c.parent_passage_id
+            )
+        )
+
+        # map CTE to the Passage model
+        passage_alias = aliased(Passage, recursive_cte)
+
+        # order by created_at so the list is in chronological order
+        query = select(passage_alias).order_by(passage_alias.created_at.asc())
+        result = await db.execute(query)
+
+        passages = result.scalars().all()
+
+        return [PassageRead.model_validate(p) for p in passages]
+
+
+async def get_story_tree(story_id: int) -> list[PassageRead]:
+    """
+    Return a list of passages representing the entire tree-structured story.
+    """
     async with SessionLocal() as db:
         # retrieve all passages for this story
         query = (
