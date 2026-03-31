@@ -4,6 +4,11 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_auth_flow_and_me_endpoint(client: AsyncClient):
+    """
+    Test that a user is able to successfully register an account, login and
+    use the /auth/me endpoint to see their user information.
+    """
+
     # 1. setup test data
     user_credentials = {
         "username": "testauthor1",

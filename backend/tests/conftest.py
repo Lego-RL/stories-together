@@ -29,8 +29,8 @@ async def setup_test_db():
         await conn.run_sync(Base.metadata.create_all)
     yield
     # drop tables after all tests are done
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    # async with test_engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.drop_all)
 
     await test_engine.dispose()
 
