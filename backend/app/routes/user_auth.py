@@ -4,7 +4,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-# from ..db.session import get_db
 from ..db.models import Token, User
 from ..repositories import user as user_repo
 from ..repositories.auth import (

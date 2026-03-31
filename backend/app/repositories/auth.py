@@ -12,7 +12,7 @@ from ..db.models import TokenData, User
 from . import user as user_repo
 
 # load secret key for JWT tokens from .env
-SECRET_KEY = os.getenv("SECRET_KEY", "your-fallback-secret-for-dev")
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-for-dev")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
+from .routes.stories import story_router
 from .routes.user_auth import auth_router
 
 app = FastAPI(
@@ -14,6 +15,7 @@ def get_root():
 
 
 app.include_router(auth_router)
+app.include_router(story_router)
 
 
 def start_server():
