@@ -1,17 +1,19 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="tests/.env.test", override=True)
+TEST_DATABASE_URL = os.getenv("DATABASE_URL")
+
+# ruff: disable[E402] (having code before imports)
+# dotenv needs to load prior to production db url being loaded from other module
 import pytest_asyncio
 from app.db import session
 from app.db.models import Base
 from app.server import app
-from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
-
-# load test environment variables
-load_dotenv(dotenv_path="tests/.env.test")
-TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -29,8 +31,8 @@ async def setup_test_db():
         await conn.run_sync(Base.metadata.create_all)
     yield
     # drop tables after all tests are done
-    # async with test_engine.begin() as conn:
-    #     await conn.run_sync(Base.metadata.drop_all)
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
     await test_engine.dispose()
 
