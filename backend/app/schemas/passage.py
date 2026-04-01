@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PassageCreate(BaseModel):
@@ -12,7 +12,7 @@ class PassageCreate(BaseModel):
     - parent_passage_id
     """
 
-    content: str
+    content: str = Field(..., min_length=10, max_length=5000)
     parent_passage_id: int
 
 
@@ -27,6 +27,7 @@ class PassageRead(BaseModel):
     - parent_passage_id
     - created_at
     """
+
     id: int
     content: str
     author_id: int
@@ -35,8 +36,10 @@ class PassageRead(BaseModel):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
+
 class PassageTree(PassageRead):
     """
     Represents not only a single passage, but all attached sub-passages as well.
     """
+
     children: List["PassageTree"] = []

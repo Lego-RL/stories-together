@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class StoryBase(BaseModel):
@@ -12,8 +12,13 @@ class StoryBase(BaseModel):
     - description
     """
 
-    title: str
-    description: Optional[str] = None
+    title: str = Field(
+        ...,
+        min_length=5,
+        max_length=100,
+        description="Give your story a good title or else",
+    )
+    description: Optional[str] = Field(None, max_length=500)
 
 
 class StoryCreate(StoryBase):
@@ -25,7 +30,7 @@ class StoryCreate(StoryBase):
     - first_passage_content
     """
 
-    first_passage_content: str
+    first_passage_content: str = Field(..., min_length=30, max_length=5000)
 
 
 class StoryRead(StoryBase):
@@ -42,26 +47,4 @@ class StoryRead(StoryBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
     creator_id: int
-    created_at: datetime
-
-
-# info needed to read a story's passage
-class PassageRead(BaseModel):
-    """
-    Represents a passage's complete metadata & data.
-    Fields:
-    - id
-    - content
-    - author_id
-    - story_id
-    - parent_passage_id
-    - created_at
-    """
-
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    content: str
-    author_id: int
-    story_id: int
-    parent_passage_id: Optional[int] = None
     created_at: datetime

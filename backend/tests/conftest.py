@@ -8,9 +8,9 @@ TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 # ruff: disable[E402] (having code before imports)
 # dotenv needs to load prior to production db url being loaded from other module
 import pytest_asyncio
-from app.db import session
-from app.db.models import Base
-from app.server import app
+from ..app.db import session
+from ..app.db.models import Base
+from ..app.server import app
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
