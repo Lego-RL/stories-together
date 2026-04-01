@@ -30,7 +30,7 @@ class StoryCreate(StoryBase):
     - first_passage_content
     """
 
-    first_passage_content: str = Field(..., min_length=30, max_length=5000)
+    first_passage_content: str = Field(..., min_length=5, max_length=5000)
 
 
 class StoryRead(StoryBase):

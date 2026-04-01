@@ -12,7 +12,7 @@ class PassageCreate(BaseModel):
     - parent_passage_id
     """
 
-    content: str = Field(..., min_length=10, max_length=5000)
+    content: str = Field(..., min_length=5, max_length=5000)
     parent_passage_id: int
 
 
