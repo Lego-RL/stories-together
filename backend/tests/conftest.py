@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="class", autouse=True)
 async def setup_test_db():
     """
     Provide a test database client to utilize during testing
@@ -56,7 +56,7 @@ async def client():
         yield ac
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="class")
 async def login_user(client: AsyncClient):
     """
     Use with endpoints that expect a user to be logged in.
@@ -79,3 +79,26 @@ async def login_user(client: AsyncClient):
     token = login_res.json()["access_token"]
 
     return {"user": login_res.json(), "headers": {"Authorization": f"Bearer {token}"}}
+
+
+@pytest_asyncio.fixture(scope="class")
+async def populate_stories(client: AsyncClient, login_user):
+    """
+    Create several stories to add to the test db.
+    """
+
+    auth = login_user["headers"]
+
+    # sample stories
+    stories_to_seed = [
+        {"title": "The Dragon's Echo", "first_passage_content": "Once upon a time..."},
+        {"title": "The Infinite Loop", "first_passage_content": "While True:"},
+        {
+            "title": "Echoes of the Past",
+            "first_passage_content": "The history is deep...",
+        },
+        {"title": "Crimson Skies", "first_passage_content": "The clouds were red."},
+    ]
+
+    for story in stories_to_seed:
+        await client.post("/stories/", json=story, headers=auth)

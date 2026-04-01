@@ -45,5 +45,6 @@ async def search_stories_by_title(query: str, limit: int = 5):
             )  # Use similarity function from pg_trgm postgres extension
             .limit(limit)
         )
+
         result = await db.execute(stmt)
         return result.scalars().all()
