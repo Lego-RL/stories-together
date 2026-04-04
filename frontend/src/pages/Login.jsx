@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { mutate: login, isPending, isError, error } = useLogin();
+  const { mutate: login, isPending, isError, error } = useLogin({
+    onSuccess: () => navigate("/", { replace: true }),
+  });
 
   const handleLogin = () => {
     if (!username || !password) return;

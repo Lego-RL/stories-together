@@ -1,5 +1,7 @@
 import Login from "./Login";
 import { useMe } from "../hooks/useAuth";
+import UserCard from "../components/shared/UserCard";
+import LandingPage from "./Home";
 
 
 export default function Profile() {
@@ -13,5 +15,6 @@ export default function Profile() {
     );
   }
 
+  
   return user ? <UserCard user={user} /> : <Login />;
 }

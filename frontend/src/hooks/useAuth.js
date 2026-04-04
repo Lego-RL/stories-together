@@ -5,27 +5,36 @@ export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: authApi.me,
-    enabled: !!localStorage.getItem("token"), // only fetch if a token exists
     retry: false,
   });
 }
 
-export function useLogin() {
+export function useLogin(options = {}) {
   const queryClient = useQueryClient();
+  const { onSuccess: userOnSuccess, ...restOptions } = options;
+
   return useMutation({
     mutationFn: ({ username, password }) => authApi.login(username, password),
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables, context) => {
       localStorage.setItem("token", data.access_token);
-      // mark old user info as stale, refetch `me` endpoint
-      await queryClient.fetchQuery({ queryKey: ["me"], queryFn: authApi.me });  
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      if (userOnSuccess) {
+        userOnSuccess(data, variables, context);
+      }
     },
+    ...restOptions,
   });
 }
 
-export function useLogout() {
+export function useLogout(options = {}) {
   const queryClient = useQueryClient();
+  const { onSuccess: userOnSuccess, ...restOptions } = options;
+
   return () => {
     authApi.logout();
     queryClient.setQueryData(["me"], null);
-    };
+    if (userOnSuccess) {
+      userOnSuccess();
+    }
+  };
 }
