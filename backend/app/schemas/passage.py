@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import List, Optional
 
@@ -42,4 +44,4 @@ class PassageTree(PassageRead):
     Represents not only a single passage, but all attached sub-passages as well.
     """
 
-    children: List["PassageTree"] = []
+    children: List["PassageTree"] = Field(default_factory=list)

@@ -8,10 +8,12 @@ from ..db.models import Token, User
 from ..repositories import user as user_repo
 from ..repositories.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
+    REFRESH_TOKEN_EXPIRE_DAYS,
     create_access_token,
     get_current_user,
     get_password_hash,
     verify_password,
+    verify_refresh_token,
 )
 
 auth_router = APIRouter(prefix="/auth", tags=["authorization"])
@@ -39,7 +41,6 @@ async def register(username: str, email: str, password: str):
 @auth_router.post("/login", response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = await user_repo.get_user_by_username(form_data.username)
-
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +51,43 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         data={"sub": user.username},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    refresh_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@auth_router.post("/refresh", response_model=Token)
+async def refresh_access_token(refresh_token: str):
+    """
+    Exchanges a valid refresh token for a new access token.
+    """
+    username = verify_refresh_token(refresh_token)
+
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        )
+
+    new_access_token = create_access_token(
+        data={"sub": username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+
+    # return new access token
+    return {
+        "access_token": new_access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @auth_router.get("/me")

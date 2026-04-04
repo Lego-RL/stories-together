@@ -1,9 +1,10 @@
-from app.db.models import Passage
-from app.db.session import SessionLocal
-from app.schemas.passage import PassageRead
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import aliased
+
+from app.db.models import Passage
+from app.db.session import SessionLocal
+from app.schemas.passage import PassageRead, PassageTree
 
 
 async def create_passage(
@@ -73,7 +74,7 @@ async def get_passage_path(passage_id: int) -> list[PassageRead]:
         return [PassageRead.model_validate(p) for p in passages]
 
 
-async def get_story_tree(story_id: int) -> list[PassageRead]:
+async def get_story_tree(story_id: int) -> list[PassageTree]:
     """
     Return a list of passages representing the entire tree-structured story.
     """
@@ -90,7 +91,13 @@ async def get_story_tree(story_id: int) -> list[PassageRead]:
         if not passages:
             return []
 
-        passage_map = {p.id: PassageRead.model_validate(p) for p in passages}
+        # initially validate as `PassageRead` so that SQLAlchemy doesn't
+        # attempt to lazy-load `PassageTree`'s `children` attribute
+        passage_map = {
+            p.id: PassageTree(**PassageRead.model_validate(p).model_dump())
+            for p in passages
+        }
+
         root_nodes = []
 
         # build tree of passages for this story
@@ -98,7 +105,7 @@ async def get_story_tree(story_id: int) -> list[PassageRead]:
             if p_schema.parent_passage_id is None:
                 root_nodes.append(p_schema)
             else:
-                # retrieve parent passage
+                # retrieve parent passage from the map
                 parent = passage_map.get(p_schema.parent_passage_id)
                 if parent:
                     # add this passage to child list of its parent

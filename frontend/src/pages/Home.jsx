@@ -12,7 +12,7 @@ export default function LandingPage() {
   const { data: stories, isLoading, isError } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
-      const response = await api.get("/stories/");
+      const response = await api.get("/stories/?limit=3");
       console.log(response)
       return response ?? [];
     },
@@ -45,7 +45,7 @@ export default function LandingPage() {
 
         {/* 3. story cards! */}
         {!isLoading && !isError && (
-        <> {/* Wrap both sections in a Fragment */}
+        <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stories?.slice(0, 3).map((story) => (
                 <StoryCard 
@@ -56,7 +56,7 @@ export default function LandingPage() {
                 />
             ))}
             
-            {/* Fallback if no stories exist yet */}
+            {/* in case no stories exist display placeholder */}
             {stories?.length === 0 && (
                 <div className="col-span-3 text-center py-20 border-2 border-dashed border-stone-900 rounded-2xl">
                 <p className="text-stone-600">The library is empty. Be the first to start a tale.</p>

@@ -15,6 +15,7 @@ from . import user as user_repo
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-for-dev")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -60,3 +61,14 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     if user is None:
         raise credentials_exception
     return user
+
+
+def verify_refresh_token(token: str) -> str | None:
+    """
+    Decodes a token and returns the username (sub) if valid.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("sub")
+    except InvalidTokenError:
+        return None

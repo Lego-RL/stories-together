@@ -26,6 +26,18 @@ async def create_story_with_first_passage(
         return new_story
 
 
+async def get_one_story(id: int):
+    """
+    Retrieve a single story's title and description
+    """
+
+    async with SessionLocal() as db:
+        query = (select(Story).where(Story.id == id))
+
+        result = await db.execute(query)
+        return result.scalar_one_or_none()
+
+
 async def get_all_stories(skip: int = 0, limit: int = 10):
     async with SessionLocal() as db:
         query = (

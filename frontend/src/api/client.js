@@ -1,6 +1,9 @@
 const BASE_URL = "/api"; // Vite proxy rewrites this to http://localhost:8000
 
-async function request(path, options = {}) {
+/**
+ * request wrapper to handle automated token refresh on 401 errors.
+ */
+async function request(path, options = {}, isRetry = false) {
   const token = localStorage.getItem("token");
 
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -12,6 +15,34 @@ async function request(path, options = {}) {
     },
   });
 
+  // try to refresh token
+  if (res.status === 401 && !isRetry) {
+    const refreshToken = localStorage.getItem("refresh_token");
+
+    if (refreshToken) {
+      try {
+        // attempt to get new token
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh?refresh_token=${refreshToken}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          
+          // retry original request
+          localStorage.setItem("token", data.access_token);
+          return request(path, options, true);
+        }
+      } catch (err) {
+        // clear session if refresh fails
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+    }
+  }
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
     throw new Error(error.detail || "Request failed");
@@ -22,5 +53,8 @@ async function request(path, options = {}) {
 
 export const api = {
   get: (path) => request(path),
-  post: (path, body) => request(path, { method: "POST", body: JSON.stringify(body) }),
+  post: (path, body) => request(path, { 
+    method: "POST", 
+    body: JSON.stringify(body) 
+  }),
 };

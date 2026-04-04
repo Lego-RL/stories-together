@@ -1,12 +1,14 @@
 from typing import Annotated, List
 
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from app.db.models import User
+from app.exceptions import EntityNotFoundException
 from app.repositories import passage as passage_repo
 from app.repositories import story as story_repo
 from app.repositories.auth import get_current_user
 from app.schemas.passage import PassageCreate, PassageRead, PassageTree
 from app.schemas.story import StoryCreate, StoryRead
-from fastapi import APIRouter, Depends, HTTPException, status
 
 story_router = APIRouter(prefix="/stories", tags=["stories"])
 
@@ -21,6 +23,19 @@ async def create_new_story(
         first_passage_content=story_in.first_passage_content,
         creator_id=current_user.id,
     )
+
+
+@story_router.get("/{id}", response_model=StoryRead)
+async def get_story_details(id: int):
+    """
+    Returns the metadata (title, description) for a specific story.
+    """
+    story = await story_repo.get_one_story(id)
+
+    if not story:
+        raise EntityNotFoundException(entity_name="Story", entity_id=id)
+
+    return story
 
 
 @story_router.get("/", response_model=List[StoryRead])

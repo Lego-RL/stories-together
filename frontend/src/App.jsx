@@ -2,6 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import CreateStory from "./pages/CreateStory";
+import ViewStory from "./pages/ViewStory";
+import Contribute from "./pages/Contribute";
+import StoryPath from "./pages/StoryPath";
 
 function App() {
   return (
@@ -15,8 +18,10 @@ function App() {
 
       <Route path="/create-story" element={<CreateStory />}  />
 
-      {/* Dynamic URL: url.com/story/1, url.com/story/42 */}
-      {/* <Route path="/story/:id" element={<StoryPage />} /> */}
+      {/* dynamic urls */}
+      <Route path="/story/:id" element={<ViewStory />} />
+      <Route path="/story/:id/contribute" element={<Contribute />} />
+      <Route path="/story/passages/:passage_id/path" element={<StoryPath />} />
     </Routes>
   );
 }
