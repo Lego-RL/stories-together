@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,6 +22,16 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
+            
+            # force load the full user environment to get the correct Node/NPM paths
+            [ -f ~/.bashrc ] && . ~/.bashrc
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # log versions to GitHub Actions output for verification
+            echo "Using Node: $(node -v)"
+            echo "Using NPM: $(npm -v)"
             cd ~/stories-together
             git pull origin main
 
@@ -29,3 +42,4 @@ jobs:
 
             # 2. Restart Backend
             sudo systemctl restart gunicorn
+            echo "Deployment successful."
