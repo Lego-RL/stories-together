@@ -2,10 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "../api/auth";
 
 export function useMe() {
+  const token = localStorage.getItem("token");
+
   return useQuery({
     queryKey: ["me"],
     queryFn: authApi.me,
+    enabled: !!token,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

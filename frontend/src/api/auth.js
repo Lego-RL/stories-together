@@ -29,10 +29,18 @@ export const authApi = {
 
   me: async () => {
     const token = localStorage.getItem("token");
+    
+    if (!token) return null;
+
     const res = await fetch(`${BASE_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error("Failed to fetch user");
+
+    if (!res.ok) {
+      localStorage.removeItem("token");
+      throw new Error("Failed to fetch user");
+    }
+    
     return res.json();
   },
 
