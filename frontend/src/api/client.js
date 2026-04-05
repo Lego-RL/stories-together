@@ -1,4 +1,4 @@
-const BASE_URL = ""; // Vite proxy rewrites this to http://localhost:8000
+const BASE_URL = "/api"; // Vite proxy rewrites this to http://localhost:8000
 
 /**
  * request wrapper to handle automated token refresh on 401 errors.
