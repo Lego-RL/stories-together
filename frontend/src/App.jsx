@@ -5,12 +5,13 @@ import CreateStory from "./pages/CreateStory";
 import ViewStory from "./pages/ViewStory";
 import Contribute from "./pages/Contribute";
 import StoryPath from "./pages/StoryPath";
+import Login from "./pages/Login";
 
 function App() {
   return (
     <Routes>
       {/* profile  */}
-      <Route path="/login" element={<Profile />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
 
       {/* landing page */}
