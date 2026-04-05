@@ -1,6 +1,8 @@
 import uvicorn
+import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from .routes.stories import story_router
 from .routes.user_auth import auth_router
@@ -10,6 +12,16 @@ app = FastAPI(
     title="Stories Together API", description="API for Stories Together Applications"
 )
 
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Explicitly whitelist your production IP/domain here
+    allow_credentials=True,
+    allow_methods=["*"], # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"], # Allow all headers (Authorization, Content-Type, etc.)
+)
 
 @app.get("/")
 def get_root():
