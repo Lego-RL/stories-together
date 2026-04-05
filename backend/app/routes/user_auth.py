@@ -1,9 +1,10 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
+from ..schemas.user_register import UserRegister
 from ..db.models import Token, User
 from ..repositories import user as user_repo
 from ..repositories.auth import (
@@ -20,8 +21,10 @@ auth_router = APIRouter(prefix="/auth", tags=["authorization"])
 
 
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(username: str, email: str, password: str):
-    existing_user = await user_repo.get_user_by_username_or_email(username, email)
+async def register(user: UserRegister):
+    existing_user = await user_repo.get_user_by_username_or_email(
+        user.username, user.email
+    )
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -30,9 +33,9 @@ async def register(username: str, email: str, password: str):
 
     await user_repo.create_user(
         {
-            "username": username,
-            "email": email,
-            "hashed_password": get_password_hash(password),
+            "username": user.username,
+            "email": user.email,
+            "hashed_password": get_password_hash(user.password),
         }
     )
     return {"message": "User created successfully"}
@@ -65,7 +68,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 @auth_router.post("/refresh", response_model=Token)
-async def refresh_access_token(refresh_token: str):
+async def refresh_access_token(refresh_token: Annotated[str, Body()]):
     """
     Exchanges a valid refresh token for a new access token.
     """

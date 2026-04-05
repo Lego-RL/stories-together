@@ -85,6 +85,7 @@ export default function CreateStory() {
             <textarea
               name="description"
               rows={2}
+              minLength={20}
               maxLength={500}
               placeholder="Briefly describe the world or the goal of this story..."
               value={formData.description}
@@ -99,7 +100,7 @@ export default function CreateStory() {
             <textarea
               name="first_passage_content"
               required
-              minLength={20}
+              minLength={30}
               rows={8}
               placeholder="Write the very first passage. How does this story begin?"
               value={formData.first_passage_content}

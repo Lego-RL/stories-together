@@ -9,6 +9,21 @@ export function useMe() {
   });
 }
 
+export function useRegister(options = {}) {
+  const { onSuccess: userOnSuccess, ...restOptions } = options;
+
+  return useMutation({
+    mutationFn: ({ username, email, password }) => 
+      authApi.register(username, email, password),
+    onSuccess: (data, variables, context) => {
+      if (userOnSuccess) {
+        userOnSuccess(data, variables, context);
+      }
+    },
+    ...restOptions,
+  });
+}
+
 export function useLogin(options = {}) {
   const queryClient = useQueryClient();
   const { onSuccess: userOnSuccess, ...restOptions } = options;

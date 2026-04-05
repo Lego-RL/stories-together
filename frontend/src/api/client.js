@@ -22,9 +22,10 @@ async function request(path, options = {}, isRetry = false) {
     if (refreshToken) {
       try {
         // attempt to get new token
-        const refreshRes = await fetch(`${BASE_URL}/auth/refresh?refresh_token=${refreshToken}`, {
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken })
         });
 
         if (refreshRes.ok) {

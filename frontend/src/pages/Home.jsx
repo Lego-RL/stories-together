@@ -26,7 +26,7 @@ export default function LandingPage() {
       <main className="flex-grow flex flex-col items-center justify-center px-4 py-16">
         <section className="w-full max-w-6xl">
           <div className="mb-12 flex flex-col items-center gap-6">
-            <h2 className="text-amber-500 uppercase tracking-[0.2em] text-xs font-bold">
+            <h2 className="text-amber-500 uppercase tracking-[0.15em] text-xl font-bold">
               Featured Stories
             </h2>
           </div>

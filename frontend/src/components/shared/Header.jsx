@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function SiteHeader({ isLoading, user }) {
+    const location = useLocation(); 
+    const isLoginPage = location.pathname === "/login";
 
     return (
     <header className="w-full p-8 flex justify-between items-start border-b border-stone-900 bg-stone-950/50 backdrop-blur-sm sticky top-0 z-10">
@@ -27,12 +29,14 @@ export default function SiteHeader({ isLoading, user }) {
             </Link>
             </div>
         ) : (
-            <Link 
-            to="/login" 
-            className="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
-            >
-            Log In
-            </Link>
+            !isLoginPage && (
+                <Link 
+                to="/login" 
+                className="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
+                >
+                Log In
+                </Link>
+            )
         )}
         </nav>
     </header>
