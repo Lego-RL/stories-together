@@ -1,0 +1,31 @@
+name: Deploy Stories Together
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/stories-together
+            git pull origin main
+
+            # 1. Build Frontend
+            cd frontend
+            npm ci
+            npm run build
+
+            # 2. Restart Backend
+            sudo systemctl restart gunicorn
