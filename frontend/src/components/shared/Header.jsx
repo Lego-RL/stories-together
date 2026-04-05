@@ -11,7 +11,7 @@ export default function SiteHeader({ isLoading, user }) {
             <Link to="/"> STORIES TOGETHER </Link>
         </h1>
         <p className="text-stone-500 text-sm mt-1 font-medium italic">
-            A collaborative collaboration for collaborators.
+            A collaborative environment for collaborators to collaborate.
         </p>
         </div>
 
