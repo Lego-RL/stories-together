@@ -24,8 +24,9 @@ export default function Login() {
 
   const handleSubmit = () => {
     if (!username || !password) return;
+
     if (isRegistering) {
-      if (!email) return;
+      if (!email || password.length < 8) return;
       registerMutation.mutate({ username, email, password });
     } else {
       loginMutation.mutate({ username, password });
@@ -36,6 +37,7 @@ export default function Login() {
     if (e.key === "Enter") handleSubmit();
   };
 
+  const isPasswordTooShort = isRegistering && password.length > 0 && password.length < 8;
   const isPending = loginMutation.isPending || registerMutation.isPending;
   const isError = loginMutation.isError || registerMutation.isError;
   const error = loginMutation.error || registerMutation.error;
@@ -89,6 +91,15 @@ export default function Login() {
                 onKeyDown={handleKeyDown}
                 className="w-full px-4 py-2.5 rounded-lg bg-stone-800 border border-stone-700 text-stone-100 focus:outline-none focus:border-amber-500 transition"
               />
+
+              {isRegistering && (
+                <p className={`text-[10px] mt-1 font-medium italic ${
+                  isPasswordTooShort ? "text-red-400" : "text-stone-500"
+                }`}>
+                  Minimum 8 characters required.
+                </p>
+              )}
+
             </div>
           </div>
 

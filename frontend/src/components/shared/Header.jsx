@@ -5,17 +5,17 @@ export default function SiteHeader({ isLoading, user }) {
     const isLoginPage = location.pathname === "/login";
 
     return (
-    <header className="w-full p-8 flex justify-between items-start border-b border-stone-900 bg-stone-950/50 backdrop-blur-sm sticky top-0 z-10">
-        <div>
-        <h1 className="text-3xl font-black tracking-tighter text-white">
+    <header className="w-full px-4 py-5 sm:p-8 flex justify-between items-start border-b border-stone-900 bg-stone-950/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="min-w-0 mr-4">
+        <h1 className="text-xl sm:text-3xl font-black tracking-tighter text-white">
             <Link to="/"> STORIES TOGETHER </Link>
         </h1>
-        <p className="text-stone-500 text-sm mt-1 font-medium italic">
+        <p className="text-stone-500 text-xs sm:text-sm mt-1 font-medium italic hidden sm:block">
             A collaborative environment for collaborators to collaborate
         </p>
         </div>
 
-        <nav className="pt-2">
+        <nav className="pt-1 sm:pt-2 shrink-0">
         {!isLoading && user ? (
             <div className="flex items-center gap-4">
             <span className="text-stone-400 text-sm">

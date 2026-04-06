@@ -44,5 +44,8 @@ export const authApi = {
     return res.json();
   },
 
-  logout: () => localStorage.removeItem("token"),
+  logout: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
+  },
 };

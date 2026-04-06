@@ -35,11 +35,18 @@ jobs:
             cd ~/stories-together
             git pull origin main
 
-            # 1. Build Frontend
+            # build frontend
             cd frontend
             npm ci
             npm run build
 
-            # 2. Restart Backend
+            # sync python backend dependencies
+            cd ../backend/app
+            /home/ubuntu/.local/bin/uv sync
+
+            # run possible alembic db migrations
+            /home/ubuntu/.local/bin/uv run alembic upgrade head
+
+            # restart backend
             sudo systemctl restart gunicorn
             echo "Deployment successful."

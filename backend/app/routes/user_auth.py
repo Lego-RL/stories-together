@@ -68,7 +68,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 @auth_router.post("/refresh", response_model=Token)
-async def refresh_access_token(refresh_token: Annotated[str, Body()]):
+async def refresh_access_token(refresh_token: Annotated[str, Body(embed=True)]):
     """
     Exchanges a valid refresh token for a new access token.
     """

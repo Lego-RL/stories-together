@@ -21,7 +21,7 @@ async function request(path, options = {}, isRetry = false) {
 
     if (refreshToken) {
       try {
-        // attempt to get new token
+        
         const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -31,15 +31,25 @@ async function request(path, options = {}, isRetry = false) {
         if (refreshRes.ok) {
           const data = await refreshRes.json();
           
-          // retry original request
           localStorage.setItem("token", data.access_token);
+          
+          // save new refresh token
+          if (data.refresh_token) {
+            localStorage.setItem("refresh_token", data.refresh_token);
+          }
+          
           return request(path, options, true);
+        } else {
+          // if backend rejects the refresh token, clear session immediately
+          localStorage.clear();
+          window.location.href = "/login";
+          return Promise.reject(new Error("Session expired"));
         }
       } catch (err) {
-        // clear session if refresh fails
+        // clear session if refresh fails (network error)
         localStorage.clear();
         window.location.href = "/login";
-        return;
+        return Promise.reject(err);
       }
     }
   }

@@ -13,7 +13,6 @@ export default function LandingPage() {
     queryKey: ["stories"],
     queryFn: async () => {
       const response = await api.get("/stories/?limit=3");
-      console.log(response)
       return response ?? [];
     },
   });

@@ -36,6 +36,8 @@ export function useLogin(options = {}) {
     mutationFn: ({ username, password }) => authApi.login(username, password),
     onSuccess: async (data, variables, context) => {
       localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       if (userOnSuccess) {
         userOnSuccess(data, variables, context);
