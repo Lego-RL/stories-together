@@ -6,13 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routes.stories import story_router
 from .routes.user_auth import auth_router
+from .routes.admin import admin_router
 from app.exceptions import StoriesTogetherException
 
 app = FastAPI(
     title="Stories Together API", description="API for Stories Together Applications"
 )
 
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+allowed_origins_str = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+)
 origins = [origin.strip() for origin in allowed_origins_str.split(",")]
 
 app.add_middleware(
@@ -23,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def get_root():
     return {"message": "Hello World :)"}
@@ -30,6 +34,8 @@ def get_root():
 
 app.include_router(auth_router)
 app.include_router(story_router)
+app.include_router(admin_router)
+
 
 @app.exception_handler(StoriesTogetherException)
 async def app_exception_handler(request: Request, exc: StoriesTogetherException):
