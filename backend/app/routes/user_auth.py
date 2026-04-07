@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..schemas.user_register import UserRegister
+from ..schemas.user import UserRegister
 from ..db.models import Token, User
 from ..repositories import user as user_repo
 from ..repositories.auth import (
