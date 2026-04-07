@@ -27,8 +27,8 @@ class TestAdmin:
             "password": "password123",
         }
 
-        await client.post("/auth/register", params=user1)
-        await client.post("/auth/register", params=user2)
+        await client.post("/auth/register", json=user1)
+        await client.post("/auth/register", json=user2)
 
         response = await client.get("/admin/users")
         assert response.status_code == 200
@@ -56,14 +56,14 @@ class TestAdmin:
     @pytest.mark.asyncio
     async def test_view_user_content_success(self, client: AsyncClient, login_user):
         """Test viewing content for an existing user."""
-        # Get the user ID from login_user fixture
+        # get user's id
         user_id = login_user["user"]["id"]
 
         response = await client.get(f"/admin/users/{user_id}")
         assert response.status_code == 200
         data = response.json()
 
-        # Check structure
+        # check user structure
         assert "username" in data
         assert "email" in data
         assert "stories" in data
@@ -71,20 +71,19 @@ class TestAdmin:
         assert isinstance(data["stories"], list)
         assert isinstance(data["passages"], list)
 
-        # Since this is a new user, should have empty lists
+        # empty stories & passages since the user is new
         assert len(data["stories"]) == 0
         assert len(data["passages"]) == 0
 
     @pytest.mark.asyncio
     async def test_view_user_content_with_stories_and_passages(
-        self, client: AsyncClient, login_user, populate_stories
+        self, client: AsyncClient, login_user
     ):
         """Test viewing content for a user who has created stories and passages."""
-        
+
         user_id = login_user["user"]["id"]
         auth_headers = login_user["headers"]
 
-        
         story_payload = {
             "title": "Test Story",
             "description": "A test story",
@@ -96,10 +95,13 @@ class TestAdmin:
         assert story_response.status_code == 201
         story_data = story_response.json()
 
-        
+        tree_response = await client.get(f"/stories/{story_data['id']}/tree")
+        assert tree_response.status_code == 200
+        root_passage_id = tree_response.json()[0]["id"]
+
         passage_payload = {
             "content": "This is a continuation of the story.",
-            "previous_passage_id": story_data["first_passage"]["id"],
+            "parent_passage_id": root_passage_id,
         }
         passage_response = await client.post(
             f"/stories/{story_data['id']}/passages",
@@ -108,22 +110,21 @@ class TestAdmin:
         )
         assert passage_response.status_code == 201
 
-        
         response = await client.get(f"/admin/users/{user_id}")
         assert response.status_code == 200
         data = response.json()
 
         assert len(data["stories"]) == 1
-        assert len(data["passages"]) == 2  
+        assert len(data["passages"]) == 2
 
-        # Check story structure
+        # verify story structure
         story = data["stories"][0]
         assert "id" in story
         assert "title" in story
         assert "description" in story
         assert story["title"] == "Test Story"
 
-        # Check passages structure
+        # verify passage structure
         for passage in data["passages"]:
             assert "id" in passage
             assert "content" in passage

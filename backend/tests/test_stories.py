@@ -22,7 +22,7 @@ class TestStories:
             "email": "bard@test.com",
             "password": "secret_password",
         }
-        await client.post("/auth/register", params=user_creds)
+        await client.post("/auth/register", json=user_creds)
 
         # login, get token back
         login_res = await client.post(

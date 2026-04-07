@@ -1,7 +1,5 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-
 from app.db.models import User
 from app.exceptions import EntityNotFoundException
 from app.repositories import passage as passage_repo
@@ -9,6 +7,7 @@ from app.repositories import story as story_repo
 from app.repositories.auth import get_current_user
 from app.schemas.passage import PassageCreate, PassageRead, PassageTree
 from app.schemas.story import StoryCreate, StoryRead
+from fastapi import APIRouter, Depends, HTTPException, status
 
 story_router = APIRouter(prefix="/stories", tags=["stories"])
 
@@ -23,6 +22,13 @@ async def create_new_story(
         first_passage_content=story_in.first_passage_content,
         creator_id=current_user.id,
     )
+
+
+@story_router.get("/search", response_model=List[StoryRead])
+async def search_stories(q: str):
+    if len(q) < 3:
+        return []
+    return await story_repo.search_stories_by_title(query=q)
 
 
 @story_router.get("/{id}", response_model=StoryRead)
@@ -74,10 +80,3 @@ async def get_passage_linear_path(passage_id: int):
 @story_router.get("/{id}/tree", response_model=List[PassageTree])
 async def get_story_narrative_tree(id: int):
     return await passage_repo.get_story_tree(story_id=id)
-
-
-@story_router.get("/search", response_model=List[StoryRead])
-async def search_stories(q: str):
-    if len(q) < 3:
-        return []
-    return await story_repo.search_stories_by_title(query=q)

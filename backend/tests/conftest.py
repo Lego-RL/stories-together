@@ -8,12 +8,14 @@ TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 # ruff: disable[E402] (having code before imports)
 # dotenv needs to load prior to production db url being loaded from other module
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
+
 from ..app.db import session
 from ..app.db.models import Base
 from ..app.server import app
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
 
 
 @pytest_asyncio.fixture(scope="class", autouse=True)
@@ -36,6 +38,7 @@ async def setup_test_db():
     await test_engine.dispose()
     # create tables in the test database
     async with test_engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm;"))
         await conn.run_sync(Base.metadata.create_all)
     yield
     # drop tables after all tests are done
@@ -69,7 +72,7 @@ async def login_user(client: AsyncClient):
         "email": "happy_user@smile.com",
         "password": "secret_password",
     }
-    await client.post("/auth/register", params=user_creds)
+    await client.post("/auth/register", json=user_creds)
 
     # login, get token back
     login_res = await client.post(
@@ -77,8 +80,10 @@ async def login_user(client: AsyncClient):
         data={"username": user_creds["username"], "password": user_creds["password"]},
     )
     token = login_res.json()["access_token"]
+    auth_headers = {"Authorization": f"Bearer {token}"}
 
-    return {"user": login_res.json(), "headers": {"Authorization": f"Bearer {token}"}}
+    me_res = await client.get("/auth/me", headers=auth_headers)
+    return {"user": me_res.json(), "headers": auth_headers}
 
 
 @pytest_asyncio.fixture(scope="class")

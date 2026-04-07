@@ -17,7 +17,7 @@ async def test_auth_flow_and_me_endpoint(client: AsyncClient):
     }
 
     # 2. register new user
-    reg_res = await client.post("/auth/register", params=user_credentials)
+    reg_res = await client.post("/auth/register", json=user_credentials)
     assert reg_res.status_code == 201
 
     # 3. login to get JWT
