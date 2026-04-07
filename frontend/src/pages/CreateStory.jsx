@@ -21,7 +21,7 @@ export default function CreateStory() {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
       
       // redirect to the newly created story (using the ID from backend)
-      const storyId = response.data.id;
+      const storyId = response.id;
       navigate(`/story/${storyId}`);
     },
   });
