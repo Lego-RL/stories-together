@@ -24,11 +24,6 @@ async def setup_test_db():
     Provide a test database client to utilize during testing
     """
 
-    # run alembic upgrades to get test db in parity with
-    # config = Config("app/alembic.ini")
-    # config.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
-    # await command.upgrade(config, "head")
-
     test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 
     TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)

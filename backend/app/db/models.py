@@ -2,7 +2,7 @@ import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
 Base = declarative_base()
@@ -49,6 +49,15 @@ class Story(Base):
     creator: Mapped["User"] = relationship(back_populates="stories")
     passages: Mapped[List["Passage"]] = relationship(
         back_populates="story", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index(
+            "idx_stories_title_trgm",
+            "title",
+            postgresql_using="gin",
+            postgresql_ops={"title": "gin_trgm_ops"},
+        ),
     )
 
 
