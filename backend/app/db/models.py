@@ -57,7 +57,7 @@ class Story(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[Optional[str]] = mapped_column(String(500))
-    creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    creator_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
@@ -84,12 +84,12 @@ class Passage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(Text)
 
-    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id"), index=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), index=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     # self-referencing foreign Key for story having branching paths
     parent_passage_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("passages.id"), index=True
+        ForeignKey("passages.id", ondelete="CASCADE"), index=True
     )
 
     created_at: Mapped[datetime.datetime] = mapped_column(

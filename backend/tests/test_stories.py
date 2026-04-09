@@ -1,5 +1,18 @@
 import pytest
+from app.db.models import Passage, User
+from app.db.session import SessionLocal
+from app.repositories.passage import (
+    create_passage,
+    delete_passage_by_id,
+    get_story_tree,
+)
+from app.repositories.story import (
+    create_story_with_first_passage,
+    delete_story_by_id,
+    get_one_story,
+)
 from httpx import AsyncClient
+from sqlalchemy import select
 
 SEARCH_TEST_DATA = [
     # (query, expected_count, fragment_of_title_expected)
@@ -166,3 +179,81 @@ class TestStorySearch:
             # see if expected fragment is present in at least one of the titles
             titles = [s["title"] for s in results]
             assert any(title_fragment.lower() in t.lower() for t in titles)
+
+
+class TestDeleteFunctions:
+    @pytest.mark.asyncio
+    async def test_delete_story_by_id(self):
+        async with SessionLocal() as db:
+            user = User(
+                username="testuser",
+                email="test@example.com",
+                hashed_password="pass",
+                active=True,
+                role="user",
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+
+            story = await create_story_with_first_passage(
+                "Test Story",
+                "DescriptionDescriptionDescriptionDescription",
+                "ContentContentContentContentContentContent",
+                user.id,
+            )
+
+            deleted = await delete_story_by_id(story.id)
+            # ensure exactly one story was deleted
+            assert deleted == 1
+
+            # ensure story is truly, definitively gone
+            assert await get_one_story(story.id) is None
+
+    @pytest.mark.asyncio
+    async def test_delete_passage_by_id(self):
+        async with SessionLocal() as db:
+            user = User(
+                username="testuser2",
+                email="test2@example.com",
+                hashed_password="pass",
+                active=True,
+                role="user",
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+
+            story = await create_story_with_first_passage(
+                "Test Story2",
+                "DescriptionDescriptionDescriptionDescription",
+                "ContentContentContentContentContentContentContent",
+                user.id,
+            )
+
+            # get the story's first passage
+            tree = await get_story_tree(story.id)
+            first_passage = tree[0]
+
+            # make another passage
+            passage = await create_passage(
+                story.id, "New content", first_passage.id, user.id
+            )
+
+            # delete new passage
+            deleted = await delete_passage_by_id(passage.id)
+            assert deleted == 1
+
+            # ensure new passage is gone
+            result = await db.execute(select(Passage).where(Passage.id == passage.id))
+            assert result.scalar_one_or_none() is None
+
+    @pytest.mark.asyncio
+    async def test_delete_nonexistent_story(self):
+        deleted = await delete_story_by_id(99999)  # id shouldn't exist
+        assert deleted == 0
+
+    @pytest.mark.asyncio
+    async def test_delete_nonexistent_passage(self):
+        deleted = await delete_passage_by_id(99999)
+        assert deleted == 0

@@ -14,11 +14,11 @@
 - ✅ `/stories` see all stories
 - ✅ `/admin/users/{id}` - see all content a user made
 
-figure out whether to add 'admin' column to users table, or 'role' so other roles like moderator may exist in the future? 
+- ✅ add role column to users table so only admin role users may access admin panel
 
-- delete passage by id
-- delete story and all associated passages (add on delete cascade constraint to db)
-- add deactivated column to users table, change user queries to exclude deactivated users
+- ✅ delete passage by id
+- ✅ delete story and all associated passages (add on delete cascade constraint to db)
+- ✅ add active column to users table, change user queries to exclude inactive users
 - add times_flagged column to passages (or boolean?)
 
 

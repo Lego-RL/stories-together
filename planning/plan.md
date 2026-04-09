@@ -9,7 +9,7 @@
 
 - Endpoint for deleting story
     - ✅ update story table to cascade on delete so associated passages are deleted
-    - delete story function in `repositories/story`
+    - ✅ delete story function in `repositories/story`
 - Endpoint for deactivating user
     - ✅update user table with 'active' column, 'role' column for admin roles
     - exclude deactivated users from user searches

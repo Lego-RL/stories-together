@@ -1,11 +1,12 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import aliased
 
 from app.db.models import Passage
 from app.db.session import SessionLocal
 from app.schemas.passage import PassageRead, PassageTree
 
+# CREATE functionality
 
 async def create_passage(
     story_id: int, content: str, parent_passage_id: int, author_id: int
@@ -41,6 +42,7 @@ async def create_passage(
         # convert to pydantic model while db session is active
         return PassageRead.model_validate(new_passage)
 
+# READ functionality
 
 async def get_passage_path(passage_id: int) -> list[PassageRead]:
     """
@@ -112,3 +114,18 @@ async def get_story_tree(story_id: int) -> list[PassageTree]:
                     parent.children.append(p_schema)
 
         return root_nodes
+
+
+# DELETE functionality
+
+async def delete_passage_by_id(id: int) -> int:
+    """
+    Delete story with matching `id`.
+    Due to "ON DELETE CASCADE" constraint, associated passages will also be deleted.
+    """
+    async with SessionLocal() as db:
+        stmt = delete(Passage).where(Passage.id == id)
+        result = await db.execute(stmt)
+
+        await db.commit()
+        return result.rowcount

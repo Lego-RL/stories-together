@@ -1,6 +1,8 @@
 from app.db.models import Passage, Story
 from app.db.session import SessionLocal
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
+
+# CREATE functionality
 
 
 async def create_story_with_first_passage(
@@ -26,13 +28,16 @@ async def create_story_with_first_passage(
         return new_story
 
 
+# READ functionality
+
+
 async def get_one_story(id: int):
     """
     Retrieve a single story's title and description
     """
 
     async with SessionLocal() as db:
-        query = (select(Story).where(Story.id == id))
+        query = select(Story).where(Story.id == id)
 
         result = await db.execute(query)
         return result.scalar_one_or_none()
@@ -60,3 +65,18 @@ async def search_stories_by_title(query: str, limit: int = 5):
 
         result = await db.execute(stmt)
         return result.scalars().all()
+
+
+# DELETE functionality
+async def delete_story_by_id(id: int) -> int:
+    """
+    Delete story with matching `id`.
+    Due to "ON DELETE CASCADE" constraint, associated passages will also be deleted.
+    """
+    async with SessionLocal() as db:
+        stmt = delete(Story).where(Story.id == id)
+        result = await db.execute(stmt)
+
+        await db.commit()
+        return result.rowcount
+    
