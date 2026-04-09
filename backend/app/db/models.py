@@ -2,8 +2,18 @@ import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    func,
+    text,
+)
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
+from sqlalchemy.sql import expression
 
 Base = declarative_base()
 
@@ -27,6 +37,13 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, server_default=func.now()
+    )
+
+    active: Mapped[bool] = mapped_column(
+        Boolean, server_default=expression.true(), default=True, nullable=False
+    )
+    role: Mapped[str] = mapped_column(
+        String(20), server_default=text("user"), default="user", nullable=False
     )
 
     # relationships
