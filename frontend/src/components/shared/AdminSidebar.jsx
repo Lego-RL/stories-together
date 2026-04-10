@@ -7,7 +7,7 @@ export default function AdminSidebar({ activeSection, onSectionChange }) {
   return (
     <div className="bg-stone-900 rounded-xl p-6">
       <h3 className="text-amber-500 uppercase tracking-[0.15em] text-lg font-bold mb-4">
-        Admin Panel
+        Views
       </h3>
 
       <nav className="space-y-2">

@@ -1,8 +1,9 @@
-from typing import List
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
-from app.schemas.story import StoryRead
+from typing import List
+
 from app.schemas.passage import PassageRead
+from app.schemas.story import StoryRead
+from pydantic import BaseModel, ConfigDict
 
 
 class UserRegister(BaseModel):
@@ -25,6 +26,6 @@ class UserAdminView(UserView):
     created_at: datetime
 
 
-class UserContentView(UserView):
+class UserContentView(UserAdminView):
     stories: List[StoryRead] = []
     passages: List[PassageRead] = []
