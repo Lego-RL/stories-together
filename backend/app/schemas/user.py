@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from app.schemas.story import StoryRead
 from app.schemas.passage import PassageRead
@@ -15,6 +16,13 @@ class UserView(BaseModel):
 
     username: str
     email: str
+
+
+class UserAdminView(UserView):
+    id: int
+    role: str
+    active: bool
+    created_at: datetime
 
 
 class UserContentView(UserView):

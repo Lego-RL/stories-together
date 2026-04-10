@@ -2,7 +2,7 @@ from typing import List
 
 from app.repositories import user as user_repo
 from app.repositories.auth import require_role
-from app.schemas.user import UserContentView, UserView
+from app.schemas.user import UserAdminView, UserContentView, UserView
 from fastapi import APIRouter, Depends, HTTPException, status
 
 # admin only endpoints
@@ -15,7 +15,7 @@ admin_router = APIRouter(
 
 @admin_router.get(
     "/users",
-    response_model=List[UserView],
+    response_model=List[UserAdminView],
 )
 async def get_users():
     """
