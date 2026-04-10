@@ -82,6 +82,42 @@ async def login_user(client: AsyncClient):
 
 
 @pytest_asyncio.fixture(scope="class")
+async def login_admin_user(client: AsyncClient):
+    """
+    Create an admin user and return auth headers.
+    Returns dict of login endpoint response `user` and constructed auth header `headers`.
+    """
+    from sqlalchemy import update
+
+    from ..app.db import session
+    from ..app.db.models import User
+
+    user_creds = {
+        "username": "admin_user",
+        "email": "admin@example.com",
+        "password": "admin_password",
+    }
+    await client.post("/auth/register", json=user_creds)
+
+    # Update user role to admin in the database
+    async with session.SessionLocal() as db:
+        stmt = update(User).where(User.username == "admin_user").values(role="admin")
+        await db.execute(stmt)
+        await db.commit()
+
+    # Login
+    login_res = await client.post(
+        "/auth/login",
+        data={"username": user_creds["username"], "password": user_creds["password"]},
+    )
+    token = login_res.json()["access_token"]
+    auth_headers = {"Authorization": f"Bearer {token}"}
+
+    me_res = await client.get("/auth/me", headers=auth_headers)
+    return {"user": me_res.json(), "headers": auth_headers}
+
+
+@pytest_asyncio.fixture(scope="class")
 async def populate_stories(client: AsyncClient, login_user):
     """
     Create several stories to add to the test db.

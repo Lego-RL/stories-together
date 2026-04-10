@@ -1,10 +1,9 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..schemas.user import UserRegister
 from ..db.models import Token, User
 from ..repositories import user as user_repo
 from ..repositories.auth import (
@@ -16,6 +15,7 @@ from ..repositories.auth import (
     verify_password,
     verify_refresh_token,
 )
+from ..schemas.user import UserRegister
 
 auth_router = APIRouter(prefix="/auth", tags=["authorization"])
 
@@ -51,12 +51,12 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         )
 
     access_token = create_access_token(
-        data={"sub": user.username},
+        data={"sub": user.username, "role": user.role},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
     refresh_token = create_access_token(
-        data={"sub": user.username},
+        data={"sub": user.username, "role": user.role},
         expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
     )
 
@@ -80,8 +80,16 @@ async def refresh_access_token(refresh_token: Annotated[str, Body(embed=True)]):
             detail="Invalid or expired refresh token",
         )
 
+    # Fetch fresh user data to get current role
+    user = await user_repo.get_user_by_username(username)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
     new_access_token = create_access_token(
-        data={"sub": username},
+        data={"sub": username, "role": user.role},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
@@ -99,4 +107,5 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
         "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
+        "role": current_user.role,
     }

@@ -21,8 +21,16 @@ export default function SiteHeader({ isLoading, user }) {
             <span className="text-stone-400 text-sm">
                 Welcome back, <span className="text-amber-400 font-bold">{user.username}</span>
             </span>
-            <Link 
-                to="/profile" 
+            {user.role === 'admin' && (
+                <Link
+                    to="/admin"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
+                >
+                    Admin
+                </Link>
+            )}
+            <Link
+                to="/profile"
                 className="px-4 py-2 bg-stone-800 hover:bg-stone-700 rounded-lg text-sm font-semibold transition-colors"
             >
                 Profile
@@ -30,8 +38,8 @@ export default function SiteHeader({ isLoading, user }) {
             </div>
         ) : (
             !isLoginPage && (
-                <Link 
-                to="/login" 
+                <Link
+                to="/login"
                 className="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
                 >
                 Log In

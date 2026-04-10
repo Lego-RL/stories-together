@@ -6,6 +6,7 @@ import ViewStory from "./pages/ViewStory";
 import Contribute from "./pages/Contribute";
 import StoryPath from "./pages/StoryPath";
 import Login from "./pages/Login";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -23,6 +24,9 @@ function App() {
       <Route path="/story/:id" element={<ViewStory />} />
       <Route path="/story/:id/contribute" element={<Contribute />} />
       <Route path="/story/passages/:passage_id/path" element={<StoryPath />} />
+
+      {/* admin panel */}
+      <Route path="/admin" element={<Admin />} />
     </Routes>
   );
 }

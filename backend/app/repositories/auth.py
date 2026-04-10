@@ -72,3 +72,55 @@ def verify_refresh_token(token: str) -> str | None:
         return payload.get("sub")
     except InvalidTokenError:
         return None
+
+
+def require_role(*required_roles: str):
+    """
+    Dependency factory for role-based access control.
+
+    Usage:
+        @router.get("/admin", dependencies=[Depends(require_role("admin"))])
+        async def admin_endpoint(current_user: User = Depends(get_current_user)):
+            return {"message": "Admin access granted"}
+
+    Args:
+        *required_roles: One or more role strings to authorize (e.g., "admin", "moderator")
+
+    Returns:
+        An async dependency function that validates the user has one of the required roles.
+        Raises 403 Forbidden if the user's role is not in the allowed list.
+    """
+
+    async def check_role(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        permission_exception = HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User does not have permission to access this resource",
+        )
+
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get("sub")
+            role: str = payload.get("role")
+
+            if username is None:
+                raise credentials_exception
+
+            if role is None or role not in required_roles:
+                raise permission_exception
+
+            # Optionally fetch fresh user from DB to verify still exists
+            user = await user_repo.get_user_by_username(username)
+            if user is None:
+                raise credentials_exception
+
+            return user
+
+        except InvalidTokenError:
+            raise credentials_exception
+
+    return check_role

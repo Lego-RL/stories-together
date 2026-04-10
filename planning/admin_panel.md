@@ -21,7 +21,7 @@
 - ✅ add active column to users table, change user queries to exclude inactive users
 - add times_flagged column to passages (or boolean?)
 
-- figure out authentication system, ensuring only admins may access admin panel / admin endpoints
+- ✅ figure out authentication system, ensuring only admins may access admin panel / admin endpoints
 
 
 - `/stats` return statistics like total stories, total passages, contributions in the last 24hrs, etc
