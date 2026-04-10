@@ -25,6 +25,7 @@ class PassageRead(BaseModel):
     - id
     - content
     - author_id
+    - author_username
     - story_id
     - parent_passage_id
     - created_at
@@ -33,6 +34,7 @@ class PassageRead(BaseModel):
     id: int
     content: str
     author_id: int
+    author_username: str
     story_id: int
     parent_passage_id: Optional[int]
     created_at: datetime

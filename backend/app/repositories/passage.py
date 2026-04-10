@@ -1,12 +1,12 @@
-from fastapi import HTTPException, status
-from sqlalchemy import select, delete
-from sqlalchemy.orm import aliased
-
-from app.db.models import Passage
+from app.db.models import Passage, User
 from app.db.session import SessionLocal
 from app.schemas.passage import PassageRead, PassageTree
+from fastapi import HTTPException, status
+from sqlalchemy import delete, select
+from sqlalchemy.orm import aliased
 
 # CREATE functionality
+
 
 async def create_passage(
     story_id: int, content: str, parent_passage_id: int, author_id: int
@@ -39,10 +39,16 @@ async def create_passage(
         await db.commit()
         await db.refresh(new_passage)
 
+        # Set author_username for the response
+        author = await db.execute(select(User.username).where(User.id == author_id))
+        new_passage.author_username = author.scalar_one()
+
         # convert to pydantic model while db session is active
         return PassageRead.model_validate(new_passage)
 
+
 # READ functionality
+
 
 async def get_passage_path(passage_id: int) -> list[PassageRead]:
     """
@@ -52,28 +58,36 @@ async def get_passage_path(passage_id: int) -> list[PassageRead]:
         # use recursive CTE to construct entire passage path
         # start with the specific passage requested
         recursive_cte = (
-            select(Passage)
+            select(Passage, User.username.label("author_username"))
+            .join(User, Passage.author_id == User.id)
             .where(Passage.id == passage_id)
             .cte(name="passage_path", recursive=True)
         )
 
         # join the CTE with the Passage table to find parent passages
         recursive_cte = recursive_cte.union_all(
-            select(Passage).join(
-                recursive_cte, Passage.id == recursive_cte.c.parent_passage_id
-            )
+            select(Passage, User.username.label("author_username"))
+            .join(User, Passage.author_id == User.id)
+            .join(recursive_cte, Passage.id == recursive_cte.c.parent_passage_id)
         )
 
         # map CTE to the Passage model
         passage_alias = aliased(Passage, recursive_cte)
 
         # order by created_at so the list is in chronological order
-        query = select(passage_alias).order_by(passage_alias.created_at.asc())
+        query = select(passage_alias, recursive_cte.c.author_username).order_by(
+            passage_alias.created_at.asc()
+        )
         result = await db.execute(query)
 
-        passages = result.scalars().all()
+        rows = result.all()
+        passages = []
+        for row in rows:
+            passage, author_username = row
+            passage.author_username = author_username
+            passages.append(PassageRead.model_validate(passage))
 
-        return [PassageRead.model_validate(p) for p in passages]
+        return passages
 
 
 async def get_story_tree(story_id: int) -> list[PassageTree]:
@@ -83,12 +97,19 @@ async def get_story_tree(story_id: int) -> list[PassageTree]:
     async with SessionLocal() as db:
         # retrieve all passages for this story
         query = (
-            select(Passage)
+            select(Passage, User.username.label("author_username"))
+            .join(User, Passage.author_id == User.id)
             .where(Passage.story_id == story_id)
             .order_by(Passage.created_at.asc())
         )
         result = await db.execute(query)
-        passages = result.scalars().all()
+        rows = result.all()
+
+        passages = []
+        for row in rows:
+            passage, author_username = row
+            passage.author_username = author_username
+            passages.append(passage)
 
         if not passages:
             return []
@@ -117,6 +138,7 @@ async def get_story_tree(story_id: int) -> list[PassageTree]:
 
 
 # DELETE functionality
+
 
 async def delete_passage_by_id(id: int) -> int:
     """

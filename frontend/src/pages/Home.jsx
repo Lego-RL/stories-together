@@ -52,6 +52,8 @@ export default function LandingPage() {
                 id={story.id}
                 title={story.title}
                 description={story.description}
+                creator_username={story.creator_username}
+                created_at={story.created_at}
                 />
             ))}
             

@@ -117,6 +117,10 @@ export default function StoryPath() {
                   <span>Passage #{index + 1}</span>
                   <span className="w-1 h-1 rounded-full bg-stone-800" />
                   <span>ID: {passage.id}</span>
+                  <span className="w-1 h-1 rounded-full bg-stone-800" />
+                  <span>By {passage.author_username || "Unknown"}</span>
+                  <span className="w-1 h-1 rounded-full bg-stone-800" />
+                  <span>{passage.created_at ? new Date(passage.created_at).toLocaleString() : "Unknown date"}</span>
                 </header>
 
                 <p className="text-lg md:text-xl text-stone-200 leading-relaxed font-serif italic whitespace-pre-wrap first-letter:text-3xl first-letter:font-black first-letter:text-amber-500">
@@ -168,11 +172,16 @@ export default function StoryPath() {
                 <p className="text-sm text-stone-300 line-clamp-4 italic">
                   "{child.content}"
                 </p>
-                <div className="mt-4 pt-4 border-t border-stone-800 flex justify-between items-center">
-                  <span className="text-[10px] text-stone-600 font-bold uppercase">Branch #{child.id}</span>
-                  <Link to={`/story/passages/${child.id}/path`} className="text-amber-500 text-xs font-bold hover:underline">
-                    Explore →
-                  </Link>
+                <div className="mt-4 pt-4 border-t border-stone-800 flex flex-col">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] text-stone-600 font-bold uppercase">Branch #{child.id}</span>
+                    <Link to={`/story/passages/${child.id}/path`} className="text-amber-500 text-xs font-bold hover:underline">
+                      Explore →
+                    </Link>
+                  </div>
+                  <div className="text-[10px] text-stone-500">
+                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString() : "Unknown date"}
+                  </div>
                 </div>
               </div>
             ))}

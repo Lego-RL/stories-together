@@ -1,7 +1,7 @@
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 
-from ..db.models import User
+from ..db.models import Passage, Story, User
 from ..db.session import SessionLocal
 
 
@@ -38,10 +38,20 @@ async def get_user_with_content(user_id: int) -> User | None:
     async with SessionLocal() as db:
         result = await db.execute(
             select(User)
-            .options(selectinload(User.stories), selectinload(User.passages))
+            .options(
+                selectinload(User.stories).selectinload(Story.creator),
+                selectinload(User.passages).selectinload(Passage.author),
+            )
             .where(User.id == user_id)
         )
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+        if user:
+            # Set usernames on stories and passages
+            for story in user.stories:
+                story.creator_username = story.creator.username
+            for passage in user.passages:
+                passage.author_username = passage.author.username
+        return user
 
 
 async def update_user_active(user_id: int, active: bool) -> User | None:

@@ -1,4 +1,4 @@
-from app.db.models import Passage, Story
+from app.db.models import Passage, Story, User
 from app.db.session import SessionLocal
 from sqlalchemy import delete, func, select
 
@@ -25,6 +25,11 @@ async def create_story_with_first_passage(
 
         await db.commit()
         await db.refresh(new_story)
+
+        # Set creator_username for the response
+        creator = await db.execute(select(User.username).where(User.id == creator_id))
+        new_story.creator_username = creator.scalar_one()
+
         return new_story
 
 
@@ -37,25 +42,45 @@ async def get_one_story(id: int):
     """
 
     async with SessionLocal() as db:
-        query = select(Story).where(Story.id == id)
+        query = (
+            select(Story, User.username.label("creator_username"))
+            .join(User, Story.creator_id == User.id)
+            .where(Story.id == id)
+        )
 
         result = await db.execute(query)
-        return result.scalar_one_or_none()
+        row = result.first()
+        if row:
+            story, creator_username = row
+            story.creator_username = creator_username
+            return story
+        return None
 
 
 async def get_all_stories(skip: int = 0, limit: int = 10):
     async with SessionLocal() as db:
         query = (
-            select(Story).offset(skip).limit(limit).order_by(Story.created_at.desc())
+            select(Story, User.username.label("creator_username"))
+            .join(User, Story.creator_id == User.id)
+            .offset(skip)
+            .limit(limit)
+            .order_by(Story.created_at.desc())
         )
         result = await db.execute(query)
-        return result.scalars().all()
+        rows = result.all()
+        stories = []
+        for row in rows:
+            story, creator_username = row
+            story.creator_username = creator_username
+            stories.append(story)
+        return stories
 
 
 async def search_stories_by_title(query: str, limit: int = 5):
     async with SessionLocal() as db:
         stmt = (
-            select(Story)
+            select(Story, User.username.label("creator_username"))
+            .join(User, Story.creator_id == User.id)
             .where(Story.title.ilike(f"%{query}%"))
             .order_by(
                 func.similarity(Story.title, query).desc()
@@ -64,7 +89,13 @@ async def search_stories_by_title(query: str, limit: int = 5):
         )
 
         result = await db.execute(stmt)
-        return result.scalars().all()
+        rows = result.all()
+        stories = []
+        for row in rows:
+            story, creator_username = row
+            story.creator_username = creator_username
+            stories.append(story)
+        return stories
 
 
 # DELETE functionality
@@ -79,4 +110,3 @@ async def delete_story_by_id(id: int) -> int:
 
         await db.commit()
         return result.rowcount
-    

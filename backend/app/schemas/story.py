@@ -39,6 +39,7 @@ class StoryRead(StoryBase):
     Fields:
     - id
     - creator_id
+    - creator_username
     - created_at
     - title
     - description
@@ -47,4 +48,5 @@ class StoryRead(StoryBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
     creator_id: int
+    creator_username: str
     created_at: datetime

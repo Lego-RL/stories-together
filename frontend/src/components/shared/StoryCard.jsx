@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
-export default function StoryCard({ id, title, description }) {
+export default function StoryCard({ id, title, description, creator_username, created_at }) {
+  const formattedDate = created_at ? new Date(created_at).toLocaleString() : "Unknown date";
+
   return (
     <Link 
       to={`/story/${id}`}
@@ -20,17 +22,21 @@ export default function StoryCard({ id, title, description }) {
         </p>
 
         {/* footer */}
-        <div className="mt-auto pt-6 flex items-center text-xs font-semibold uppercase tracking-wider text-stone-500 group-hover:text-stone-300">
-          <span>Read Story</span>
-          <svg 
-            className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
+        <div className="mt-auto pt-6 flex flex-col text-xs font-semibold uppercase tracking-wider text-stone-500 group-hover:text-stone-300">
+          <span>By {creator_username || "Unknown"}</span>
+          <span>{formattedDate}</span>
+          <div className="flex items-center mt-2">
+            <span>Read Story</span>
+            <svg 
+              className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
         </div>
       </div>
     </Link>

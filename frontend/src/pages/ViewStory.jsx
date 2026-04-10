@@ -45,6 +45,9 @@ export default function ViewStory() {
           <p className="text-stone-400 text-lg max-w-2xl border-l-2 border-stone-800 pl-4">
             {story?.description}
           </p>
+          <div className="text-stone-500 text-sm">
+            Created by {story?.creator_username || "Unknown"} on {story?.created_at ? new Date(story.created_at).toLocaleString() : "Unknown date"}
+          </div>
         </header>
 
         {/* --- initial passage --- */}
@@ -97,11 +100,16 @@ export default function ViewStory() {
                 <p className="text-sm text-stone-300 line-clamp-4 italic">
                   "{child.content}"
                 </p>
-                <div className="mt-4 pt-4 border-t border-stone-800 flex justify-between items-center">
+                <div className="mt-4 pt-4 border-t border-stone-800 flex flex-col">
+                  <div className="flex justify-between items-center mb-2">
                     <span className="text-[10px] text-stone-600 font-bold uppercase">Branch #{child.id}</span>
                     <Link to={`/story/passages/${child.id}/path`} className="text-amber-500 text-xs font-bold hover:underline">
                         Explore →
                     </Link>
+                  </div>
+                  <div className="text-[10px] text-stone-500">
+                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString() : "Unknown date"}
+                  </div>
                 </div>
               </div>
             ))}

@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import logoSrc from "../../../assets/gyraf.png";
 
 export default function SiteHeader({ isLoading, user }) {
     const location = useLocation(); 
@@ -6,13 +7,18 @@ export default function SiteHeader({ isLoading, user }) {
 
     return (
     <header className="w-full px-4 py-5 sm:p-8 flex justify-between items-start border-b border-stone-900 bg-stone-950/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="min-w-0 mr-4">
-        <h1 className="text-xl sm:text-3xl font-black tracking-tighter text-white">
-            <Link to="/"> STORIES TOGETHER </Link>
-        </h1>
-        <p className="text-stone-500 text-xs sm:text-sm mt-1 font-medium italic hidden sm:block">
-            A collaborative environment for collaborators to collaborate
-        </p>
+        <div className="flex items-center min-w-0 mr-4 gap-3">
+          <Link to="/" className="inline-flex items-center gap-3">
+            <img src={logoSrc} alt="Stories Together logo" className="h-10 w-10 shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-black tracking-tighter text-white">
+                STORIES TOGETHER
+              </h1>
+              <p className="text-stone-500 text-xs sm:text-sm mt-1 font-medium italic hidden sm:block">
+                A collaborative environment for collaborators to collaborate
+              </p>
+            </div>
+          </Link>
         </div>
 
         <nav className="pt-1 sm:pt-2 shrink-0">
