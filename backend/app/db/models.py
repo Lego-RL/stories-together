@@ -43,7 +43,7 @@ class User(Base):
         Boolean, server_default=expression.true(), default=True, nullable=False
     )
     role: Mapped[str] = mapped_column(
-        String(20), server_default=text("user"), default="user", nullable=False
+        String(20), server_default=text("'user'"), default="user", nullable=False
     )
 
     # relationships
@@ -84,7 +84,9 @@ class Passage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(Text)
 
-    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), index=True)
+    story_id: Mapped[int] = mapped_column(
+        ForeignKey("stories.id", ondelete="CASCADE"), index=True
+    )
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     # self-referencing foreign Key for story having branching paths

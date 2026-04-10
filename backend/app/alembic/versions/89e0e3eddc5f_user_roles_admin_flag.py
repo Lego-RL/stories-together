@@ -30,7 +30,10 @@ def upgrade() -> None:
     op.add_column(
         "users",
         sa.Column(
-            "role", sa.String(length=20), server_default=sa.text("user"), nullable=False
+            "role",
+            sa.String(length=20),
+            server_default=sa.text("'user'"),
+            nullable=False,
         ),
     )
     # ### end Alembic commands ###
