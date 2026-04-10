@@ -41,14 +41,20 @@ async def get_total_users(active_only: bool = True) -> int:
 
 async def get_story_creations_since(cutoff: datetime.datetime) -> int:
     async with SessionLocal() as db:
-        query = select(func.count()).select_from(Story).where(Story.created_at >= cutoff)
+        query = (
+            select(func.count()).select_from(Story).where(Story.created_at >= cutoff)
+        )
         result = await db.execute(query)
         return result.scalar_one()
 
 
 async def get_passage_creations_since(cutoff: datetime.datetime) -> int:
     async with SessionLocal() as db:
-        query = select(func.count()).select_from(Passage).where(Passage.created_at >= cutoff)
+        query = (
+            select(func.count())
+            .select_from(Passage)
+            .where(Passage.created_at >= cutoff)
+        )
         result = await db.execute(query)
         return result.scalar_one()
 
@@ -74,19 +80,25 @@ async def get_contributions_last_24_hours() -> dict[str, int]:
 
 async def get_top_contributors(limit: int = 10) -> list[dict[str, Any]]:
     story_counts = (
-        select(Story.creator_id.label("user_id"), func.count(Story.id).label("story_count"))
+        select(
+            Story.creator_id.label("user_id"), func.count(Story.id).label("story_count")
+        )
         .group_by(Story.creator_id)
         .subquery()
     )
 
     passage_counts = (
-        select(Passage.author_id.label("user_id"), func.count(Passage.id).label("passage_count"))
+        select(
+            Passage.author_id.label("user_id"),
+            func.count(Passage.id).label("passage_count"),
+        )
         .group_by(Passage.author_id)
         .subquery()
     )
 
     total_contributions = (
-        func.coalesce(story_counts.c.story_count, 0) + func.coalesce(passage_counts.c.passage_count, 0)
+        func.coalesce(story_counts.c.story_count, 0)
+        + func.coalesce(passage_counts.c.passage_count, 0)
     ).label("total_contributions")
 
     query = (
@@ -120,7 +132,9 @@ async def get_top_contributors(limit: int = 10) -> list[dict[str, Any]]:
 
 
 async def get_stats_summary(last_hours: int = 24) -> dict[str, Any]:
-    cutoff = datetime.datetime.utcnow() - datetime.timedelta(hours=last_hours)
+    cutoff = datetime.datetime.utcnow() - datetime.timedelta(
+        hours=last_hours
+    )
     story_count = await get_total_stories()
     passage_count = await get_total_passages()
     active_user_count = await get_total_users(active_only=True)

@@ -42,3 +42,25 @@ async def get_user_with_content(user_id: int) -> User | None:
             .where(User.id == user_id)
         )
         return result.scalar_one_or_none()
+
+
+async def update_user_active(user_id: int, active: bool) -> User | None:
+    async with SessionLocal() as db:
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if user:
+            user.active = active
+            await db.commit()
+            await db.refresh(user)
+        return user
+
+
+async def update_user_role(user_id: int, role: str) -> User | None:
+    async with SessionLocal() as db:
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if user:
+            user.role = role
+            await db.commit()
+            await db.refresh(user)
+        return user

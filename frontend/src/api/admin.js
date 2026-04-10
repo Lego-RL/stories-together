@@ -3,5 +3,7 @@ import { api } from "./client";
 export const adminApi = {
   getUsers: () => api.get("/admin/users"),
   getUserContent: (userId) => api.get(`/admin/users/${userId}`),
-  // Future: getStats: () => api.get("/admin/stats")
+  getStats: () => api.get("/admin/stats"),
+  updateUserActive: (userId, active) => api.put(`/admin/users/${userId}/active`, { active }),
+  updateUserRole: (userId, role) => api.put(`/admin/users/${userId}/role`, { role })
 };

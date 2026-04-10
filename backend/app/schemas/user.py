@@ -29,3 +29,11 @@ class UserAdminView(UserView):
 class UserContentView(UserAdminView):
     stories: List[StoryRead] = []
     passages: List[PassageRead] = []
+
+
+class UserActiveUpdate(BaseModel):
+    active: bool
+
+
+class UserRoleUpdate(BaseModel):
+    role: str

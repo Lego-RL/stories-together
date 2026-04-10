@@ -5,7 +5,7 @@ import SiteHeader from "../components/shared/Header";
 import SiteFooter from "../components/shared/Footer";
 import AdminSidebar from "../components/shared/AdminSidebar";
 import AdminUserList from "../components/shared/AdminUserList";
-import AdminUserDetail from "../components/shared/AdminUserDetail";
+import AdminUserModeration from "../components/shared/AdminUserModeration";
 import AdminStats from "../components/shared/AdminStats";
 
 export default function Admin() {
@@ -87,7 +87,7 @@ export default function Admin() {
 
                   {/* User Detail (only show if user is selected) */}
                   {selectedUserId && (
-                    <AdminUserDetail userId={selectedUserId} />
+                    <AdminUserModeration userId={selectedUserId} />
                   )}
                 </>
               )}
