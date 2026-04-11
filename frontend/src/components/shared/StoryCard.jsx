@@ -18,7 +18,7 @@ export default function StoryCard({ id, title, description, creator_username, cr
     >
       <div className="flex flex-col h-full">
         {/* title turns amber on card hover */}
-        <h2 className="text-xl font-bold text-stone-100 group-hover:text-amber-400 transition-colors">
+        <h2 className="text-xl font-bold text-stone-100 group-hover:text-stone-200 transition-colors">
           {title || "Untitled Tale"}
         </h2>
         
@@ -28,10 +28,12 @@ export default function StoryCard({ id, title, description, creator_username, cr
         </p>
 
         {/* footer */}
-        <div className="mt-auto pt-6 flex flex-col text-xs font-semibold uppercase tracking-wider text-stone-500 group-hover:text-stone-300">
-          <span>By {creator_username || "Unknown"}</span>
-          <span>{formattedDate}</span>
-          <div className="flex items-center mt-2">
+        <div className="mt-auto pt-6 flex flex-row items-end justify-between">
+          <div className="flex flex-col">
+            <span className="text-amber-300 group-hover:text-amber-400 text-xs font-semibold uppercase tracking-wider transition-colors">By {creator_username || "Unknown"}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 group-hover:text-stone-300 mt-2">{formattedDate}</span>
+          </div>
+          <div className="flex items-center text-xs font-semibold uppercase tracking-wider text-stone-500 group-hover:text-stone-300">
             <span>Read Story</span>
             <svg 
               className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" 

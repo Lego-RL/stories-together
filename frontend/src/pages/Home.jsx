@@ -12,7 +12,7 @@ export default function LandingPage() {
   const { data: stories, isLoading, isError } = useQuery({
     queryKey: ["stories"],
     queryFn: async () => {
-      const response = await api.get("/stories/?limit=3");
+      const response = await api.get("/stories/?limit=4");
       return response ?? [];
     },
   });
@@ -45,8 +45,8 @@ export default function LandingPage() {
         {/* 3. story cards! */}
         {!isLoading && !isError && (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {stories?.slice(0, 3).map((story) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {stories?.slice(0, 4).map((story) => (
                 <StoryCard 
                 key={story.id}
                 id={story.id}
