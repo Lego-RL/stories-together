@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
+import { countWords } from "../utils/wordCount";
 
 export default function CreateStory() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export default function CreateStory() {
           {/* error msg */}
           {mutation.isError && (
             <div className="p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg text-sm">
-              {mutation.error.response?.data?.message || "Failed to create story. Check your inputs."}
+              {mutation.error?.message || "Failed to create story. Check your inputs."}
             </div>
           )}
 
@@ -92,6 +93,11 @@ export default function CreateStory() {
               onChange={handleChange}
               className="bg-stone-900 border border-stone-800 p-3 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white resize-none"
             />
+            <div className="flex justify-end mt-2">
+              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
+                {countWords(formData.description)} words
+              </p>
+            </div>
           </div>
 
           {/* passage input */}
@@ -107,7 +113,12 @@ export default function CreateStory() {
               onChange={handleChange}
               className="bg-stone-900 border border-stone-800 p-4 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white leading-relaxed"
             />
-            <p className="text-xs text-stone-600 mt-1">Minimum 20 characters.</p>
+            <div className="flex justify-between mt-2">
+              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">Minimum 30 characters</p>
+              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
+                {countWords(formData.first_passage_content)} words
+              </p>
+            </div>
           </div>
 
           {/* buttons */}

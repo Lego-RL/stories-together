@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { useMe } from "../hooks/useAuth";
+import { countWords } from "../utils/wordCount";
 import SiteHeader from "../components/shared/Header";
 import SiteFooter from "../components/shared/Footer";
 
@@ -92,7 +93,7 @@ export default function Contribute() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {mutation.isError && (
             <div className="p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg text-sm">
-              {mutation.error.response?.data?.message || "Error submitting contribution."}
+              {mutation.error?.message || "Error submitting contribution."}
             </div>
           )}
 
@@ -114,7 +115,7 @@ export default function Contribute() {
                 Min 10 characters
               </p>
               <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
-                {content.length} characters
+                {countWords(content)} words
               </p>
             </div>
           </div>

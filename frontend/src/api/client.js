@@ -55,8 +55,11 @@ async function request(path, options = {}, isRetry = false) {
   }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.detail || "Request failed");
+    const errorBody = await res.json().catch(() => ({}));
+    const err = new Error(errorBody.detail || "Request failed");
+    err.status = res.status;
+    err.body = errorBody;
+    throw err;
   }
 
   return res.json();

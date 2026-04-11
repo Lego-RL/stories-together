@@ -7,21 +7,50 @@ from app.repositories import story as story_repo
 from app.repositories.auth import get_current_user
 from app.schemas.passage import PassageCreate, PassageRead, PassageTree
 from app.schemas.story import StoryCreate, StoryRead
-from fastapi import APIRouter, Depends, HTTPException, status
+from app.services.activity_log import log_activity
+from app.services.rate_limiter import rate_limiter
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 story_router = APIRouter(prefix="/stories", tags=["stories"])
 
 
 @story_router.post("/", response_model=StoryRead, status_code=status.HTTP_201_CREATED)
 async def create_new_story(
-    story_in: StoryCreate, current_user: Annotated[User, Depends(get_current_user)]
+    story_in: StoryCreate,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return await story_repo.create_story_with_first_passage(
+    ip_address = rate_limiter.get_client_ip(request)
+    allowed, retry_after = await rate_limiter.check_story_creation_limit(
+        current_user.id
+    )
+    if not allowed:
+        log_activity(
+            action="story_creation",
+            ip_address=ip_address,
+            user_id=current_user.id,
+            success=False,
+            detail="story_limit_exceeded",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Story creation limit reached. You can create up to 3 stories per day.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+    story = await story_repo.create_story_with_first_passage(
         title=story_in.title,
         description=story_in.description,
         first_passage_content=story_in.first_passage_content,
         creator_id=current_user.id,
     )
+    log_activity(
+        action="story_creation",
+        ip_address=ip_address,
+        user_id=current_user.id,
+        success=True,
+    )
+    return story
 
 
 @story_router.get("/search", response_model=List[StoryRead])
@@ -55,14 +84,40 @@ async def list_stories(skip: int = 0, limit: int = 10):
 async def add_passage_to_story(
     id: int,
     passage_in: PassageCreate,
+    request: Request,
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return await passage_repo.create_passage(
+    ip_address = rate_limiter.get_client_ip(request)
+    allowed, retry_after = await rate_limiter.check_passage_creation_limit(
+        current_user.id
+    )
+    if not allowed:
+        log_activity(
+            action="passage_creation",
+            ip_address=ip_address,
+            user_id=current_user.id,
+            success=False,
+            detail="passage_limit_exceeded",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Passage creation limit reached. You can create up to 30 passages per day.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+    passage = await passage_repo.create_passage(
         story_id=id,
         content=passage_in.content,
         parent_passage_id=passage_in.parent_passage_id,
         author_id=current_user.id,
     )
+    log_activity(
+        action="passage_creation",
+        ip_address=ip_address,
+        user_id=current_user.id,
+        success=True,
+    )
+    return passage
 
 
 @story_router.get("/passages/{passage_id}/path", response_model=List[PassageRead])
