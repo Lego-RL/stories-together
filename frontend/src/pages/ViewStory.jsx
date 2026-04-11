@@ -46,7 +46,14 @@ export default function ViewStory() {
             {story?.description}
           </p>
           <div className="text-stone-500 text-sm">
-            Created by {story?.creator_username || "Unknown"} on {story?.created_at ? new Date(story.created_at).toLocaleString() : "Unknown date"}
+            Created by {story?.creator_username || "Unknown"} on {story?.created_at ? new Date(story.created_at).toLocaleString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: 'numeric', 
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            }) : "Unknown date"}
           </div>
         </header>
 
@@ -108,7 +115,13 @@ export default function ViewStory() {
                     </Link>
                   </div>
                   <div className="text-[10px] text-stone-500">
-                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString() : "Unknown date"}
+                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString('en-US', {
+                      month: 'numeric',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    }) : "Unknown date"}
                   </div>
                 </div>
               </div>

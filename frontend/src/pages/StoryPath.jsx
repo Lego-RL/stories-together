@@ -120,7 +120,14 @@ export default function StoryPath() {
                   <span className="w-1 h-1 rounded-full bg-stone-800" />
                   <span>By {passage.author_username || "Unknown"}</span>
                   <span className="w-1 h-1 rounded-full bg-stone-800" />
-                  <span>{passage.created_at ? new Date(passage.created_at).toLocaleString() : "Unknown date"}</span>
+                  <span>{passage.created_at ? new Date(passage.created_at).toLocaleString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  }) : "Unknown date"}</span>
                 </header>
 
                 <p className="text-lg md:text-xl text-stone-200 leading-relaxed font-serif italic whitespace-pre-wrap first-letter:text-3xl first-letter:font-black first-letter:text-amber-500">
@@ -180,7 +187,13 @@ export default function StoryPath() {
                     </Link>
                   </div>
                   <div className="text-[10px] text-stone-500">
-                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString() : "Unknown date"}
+                    By {child.author_username || "Unknown"} • {child.created_at ? new Date(child.created_at).toLocaleString('en-US', {
+                      month: 'numeric',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    }) : "Unknown date"}
                   </div>
                 </div>
               </div>

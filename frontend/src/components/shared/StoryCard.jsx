@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
 
 export default function StoryCard({ id, title, description, creator_username, created_at }) {
-  const formattedDate = created_at ? new Date(created_at).toLocaleString() : "Unknown date";
+  const formattedDate = created_at ? new Date(created_at).toLocaleString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }) : "Unknown date";
 
   return (
     <Link 
