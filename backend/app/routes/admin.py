@@ -2,6 +2,8 @@ from typing import List
 
 from app.repositories import statistics as stats_repo
 from app.repositories import user as user_repo
+from app.repositories import story as story_repo
+from app.repositories import passage as passage_repo
 from app.repositories.auth import require_role
 from app.schemas.statistics import StatsSummary
 from app.schemas.user import (
@@ -86,3 +88,29 @@ async def update_user_role(id: int, update: UserRoleUpdate):
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return {"message": "User role updated"}
+
+
+@admin_router.delete("/stories/{id}")
+async def delete_story(id: int):
+    """
+    Delete a story by ID (admin only).
+    """
+    deleted_count = await story_repo.delete_story_by_id(id)
+    if deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Story not found"
+        )
+    return {"message": "Story deleted successfully"}
+
+
+@admin_router.delete("/passages/{id}")
+async def delete_passage(id: int):
+    """
+    Delete a passage by ID (admin only).
+    """
+    deleted_count = await passage_repo.delete_passage_by_id(id)
+    if deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Passage not found"
+        )
+    return {"message": "Passage deleted successfully"}

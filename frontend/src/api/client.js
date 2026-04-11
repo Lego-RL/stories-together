@@ -75,4 +75,5 @@ export const api = {
     method: "PUT", 
     body: JSON.stringify(body) 
   }),
+  delete: (path) => request(path, { method: "DELETE" }),
 };
