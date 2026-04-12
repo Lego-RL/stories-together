@@ -1,4 +1,40 @@
 const BASE_URL = "/api"; // Vite proxy rewrites this to http://localhost:8000
+export const AUTH_REFRESH_EVENT = "auth:refreshed";
+
+let refreshPromise = null;
+
+function clearSessionAndRedirect() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refresh_token");
+
+  if (!refreshToken) {
+    throw new Error("Session expired");
+  }
+
+  const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (!refreshRes.ok) {
+    throw new Error("Session expired");
+  }
+
+  const data = await refreshRes.json();
+  localStorage.setItem("token", data.access_token);
+
+  // Keep refresh token in sync if backend returns a rotated token.
+  if (data.refresh_token) {
+    localStorage.setItem("refresh_token", data.refresh_token);
+  }
+
+  window.dispatchEvent(new CustomEvent(AUTH_REFRESH_EVENT));
+}
 
 /**
  * request wrapper to handle automated token refresh on 401 errors.
@@ -17,40 +53,18 @@ async function request(path, options = {}, isRetry = false) {
 
   // try to refresh token
   if (res.status === 401 && !isRetry) {
-    const refreshToken = localStorage.getItem("refresh_token");
-
-    if (refreshToken) {
-      try {
-        
-        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh_token: refreshToken })
+    try {
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
         });
-
-        if (refreshRes.ok) {
-          const data = await refreshRes.json();
-          
-          localStorage.setItem("token", data.access_token);
-          
-          // save new refresh token
-          if (data.refresh_token) {
-            localStorage.setItem("refresh_token", data.refresh_token);
-          }
-          
-          return request(path, options, true);
-        } else {
-          // if backend rejects the refresh token, clear session immediately
-          localStorage.clear();
-          window.location.href = "/login";
-          return Promise.reject(new Error("Session expired"));
-        }
-      } catch (err) {
-        // clear session if refresh fails (network error)
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(err);
       }
+
+      await refreshPromise;
+      return request(path, options, true);
+    } catch (err) {
+      clearSessionAndRedirect();
+      return Promise.reject(err);
     }
   }
 

@@ -1,4 +1,5 @@
 const BASE_URL = "/api";
+import { api } from "./client";
 
 export const authApi = {
   login: async (username, password) => {
@@ -29,19 +30,17 @@ export const authApi = {
 
   me: async () => {
     const token = localStorage.getItem("token");
-    
+
     if (!token) return null;
 
-    const res = await fetch(`${BASE_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) {
-      localStorage.removeItem("token");
-      throw new Error("Failed to fetch user");
+    try {
+      return await api.get("/auth/me");
+    } catch (error) {
+      if (error?.status === 401) {
+        return null;
+      }
+      throw error;
     }
-    
-    return res.json();
   },
 
   logout: () => {
