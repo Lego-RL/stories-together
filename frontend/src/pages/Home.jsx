@@ -65,15 +65,21 @@ export default function LandingPage() {
             )}
             </div>
 
-            <div className="mt-12 flex flex-col items-center gap-6 p-7">
-            {user && (
+            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 p-7">
+              <Link
+                to="/stories"
+                className="px-6 py-2.5 bg-stone-800 hover:bg-stone-700 rounded-lg text-sm font-semibold transition-colors"
+              >
+                View All Stories
+              </Link>
+              {user && (
                 <Link
-                to="/create-story"
-                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
+                  to="/create-story"
+                  className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all"
                 >
-                Create Story
+                  Create Story
                 </Link>
-            )}
+              )}
             </div>
         </>
         )}

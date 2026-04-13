@@ -7,8 +7,12 @@ import Contribute from "./pages/Contribute";
 import StoryPath from "./pages/StoryPath";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import AllStories from "./pages/AllStories";
+import { useProactiveTokenRefresh } from "./hooks/useTokenRefresh";
 
 function App() {
+  useProactiveTokenRefresh();
+
   return (
     <Routes>
       {/* profile  */}
@@ -17,6 +21,7 @@ function App() {
 
       {/* landing page */}
       <Route path="/" element={<Home />} />
+      <Route path="/stories" element={<AllStories />} />
 
       <Route path="/create-story" element={<CreateStory />}  />
 

@@ -2,6 +2,42 @@ from app.db.models import Passage, Story, User
 from app.db.session import SessionLocal
 from sqlalchemy import delete, func, select
 
+
+def _hydrate_story_read_fields(
+    story: Story,
+    creator_username: str,
+    first_passage_content: str | None,
+    passage_count: int | None,
+) -> Story:
+    story.creator_username = creator_username
+    story.first_passage_content = first_passage_content
+    story.passage_count = int(passage_count or 0)
+    return story
+
+
+def _story_read_select():
+    first_passage_content = (
+        select(Passage.content)
+        .where(Passage.story_id == Story.id, Passage.parent_passage_id.is_(None))
+        .order_by(Passage.created_at.asc(), Passage.id.asc())
+        .limit(1)
+        .scalar_subquery()
+    )
+
+    passage_count = (
+        select(func.count(Passage.id))
+        .where(Passage.story_id == Story.id)
+        .scalar_subquery()
+    )
+
+    return select(
+        Story,
+        User.username.label("creator_username"),
+        first_passage_content.label("first_passage_content"),
+        passage_count.label("passage_count"),
+    ).join(User, Story.creator_id == User.id)
+
+
 # CREATE functionality
 
 
@@ -29,6 +65,8 @@ async def create_story_with_first_passage(
         # Set creator_username for the response
         creator = await db.execute(select(User.username).where(User.id == creator_id))
         new_story.creator_username = creator.scalar_one()
+        new_story.first_passage_content = first_passage_content
+        new_story.passage_count = 1
 
         return new_story
 
@@ -42,26 +80,25 @@ async def get_one_story(id: int):
     """
 
     async with SessionLocal() as db:
-        query = (
-            select(Story, User.username.label("creator_username"))
-            .join(User, Story.creator_id == User.id)
-            .where(Story.id == id)
-        )
+        query = _story_read_select().where(Story.id == id)
 
         result = await db.execute(query)
         row = result.first()
         if row:
-            story, creator_username = row
-            story.creator_username = creator_username
-            return story
+            story, creator_username, first_passage_content, passage_count = row
+            return _hydrate_story_read_fields(
+                story,
+                creator_username,
+                first_passage_content,
+                passage_count,
+            )
         return None
 
 
 async def get_all_stories(skip: int = 0, limit: int = 10):
     async with SessionLocal() as db:
         query = (
-            select(Story, User.username.label("creator_username"))
-            .join(User, Story.creator_id == User.id)
+            _story_read_select()
             .offset(skip)
             .limit(limit)
             .order_by(Story.created_at.desc())
@@ -70,21 +107,27 @@ async def get_all_stories(skip: int = 0, limit: int = 10):
         rows = result.all()
         stories = []
         for row in rows:
-            story, creator_username = row
-            story.creator_username = creator_username
-            stories.append(story)
+            story, creator_username, first_passage_content, passage_count = row
+            stories.append(
+                _hydrate_story_read_fields(
+                    story,
+                    creator_username,
+                    first_passage_content,
+                    passage_count,
+                )
+            )
         return stories
 
 
-async def search_stories_by_title(query: str, limit: int = 5):
+async def search_stories_by_title(query: str, skip: int = 0, limit: int = 20):
     async with SessionLocal() as db:
         stmt = (
-            select(Story, User.username.label("creator_username"))
-            .join(User, Story.creator_id == User.id)
+            _story_read_select()
             .where(Story.title.ilike(f"%{query}%"))
             .order_by(
                 func.similarity(Story.title, query).desc()
             )  # Use similarity function from pg_trgm postgres extension
+            .offset(skip)
             .limit(limit)
         )
 
@@ -92,9 +135,15 @@ async def search_stories_by_title(query: str, limit: int = 5):
         rows = result.all()
         stories = []
         for row in rows:
-            story, creator_username = row
-            story.creator_username = creator_username
-            stories.append(story)
+            story, creator_username, first_passage_content, passage_count = row
+            stories.append(
+                _hydrate_story_read_fields(
+                    story,
+                    creator_username,
+                    first_passage_content,
+                    passage_count,
+                )
+            )
         return stories
 
 

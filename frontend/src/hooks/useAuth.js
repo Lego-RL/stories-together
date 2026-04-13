@@ -1,20 +1,9 @@
-import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "../api/auth";
 import { AUTH_REFRESH_EVENT } from "../api/client";
 
 export function useMe() {
-  const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    const handleAuthRefresh = () => {
-      queryClient.invalidateQueries({ queryKey: ["me"] });
-    };
-
-    window.addEventListener(AUTH_REFRESH_EVENT, handleAuthRefresh);
-    return () => window.removeEventListener(AUTH_REFRESH_EVENT, handleAuthRefresh);
-  }, [queryClient]);
 
   return useQuery({
     queryKey: ["me"],
@@ -49,6 +38,7 @@ export function useLogin(options = {}) {
     onSuccess: async (data, variables, context) => {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
+      window.dispatchEvent(new CustomEvent(AUTH_REFRESH_EVENT));
       
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       if (userOnSuccess) {

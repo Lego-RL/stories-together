@@ -36,6 +36,8 @@ async function refreshAccessToken() {
   window.dispatchEvent(new CustomEvent(AUTH_REFRESH_EVENT));
 }
 
+export { refreshAccessToken };
+
 /**
  * request wrapper to handle automated token refresh on 401 errors.
  */

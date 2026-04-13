@@ -54,10 +54,10 @@ async def create_new_story(
 
 
 @story_router.get("/search", response_model=List[StoryRead])
-async def search_stories(q: str):
+async def search_stories(q: str, skip: int = 0, limit: int = 20):
     if len(q) < 3:
         return []
-    return await story_repo.search_stories_by_title(query=q)
+    return await story_repo.search_stories_by_title(query=q, skip=skip, limit=limit)
 
 
 @story_router.get("/{id}", response_model=StoryRead)

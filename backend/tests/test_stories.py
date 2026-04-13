@@ -59,6 +59,8 @@ class TestStories:
         assert data["title"] == "The Dragon"
         assert "id" in data
         assert data["creator_id"] is not None
+        assert data["first_passage_content"] == story_payload["first_passage_content"]
+        assert data["passage_count"] == 1
 
     @pytest.mark.asyncio
     async def test_create_story_unauthorized(self, client: AsyncClient):
@@ -153,6 +155,44 @@ class TestStories:
         assert path_data[1]["content"] == "Level 2"
         assert path_data[2]["content"] == "Level 3"
 
+    @pytest.mark.asyncio
+    async def test_list_story_includes_first_passage_and_count(
+        self, client, login_user
+    ):
+        auth = login_user["headers"]
+
+        story_res = await client.post(
+            "/stories/",
+            json={
+                "title": "Payload Check Story",
+                "description": "Testing list payload fields",
+                "first_passage_content": "Initial branch starts here",
+            },
+            headers=auth,
+        )
+        story_id = story_res.json()["id"]
+
+        tree_res = await client.get(f"/stories/{story_id}/tree")
+        root_passage_id = tree_res.json()[0]["id"]
+
+        await client.post(
+            f"/stories/{story_id}/passages",
+            json={"content": "Second passage", "parent_passage_id": root_passage_id},
+            headers=auth,
+        )
+
+        list_res = await client.get("/stories/", params={"skip": 0, "limit": 20})
+        assert list_res.status_code == 200
+
+        stories = list_res.json()
+        payload_story = next(
+            (story for story in stories if story["id"] == story_id), None
+        )
+        assert payload_story is not None
+        assert payload_story["description"] == "Testing list payload fields"
+        assert payload_story["first_passage_content"] == "Initial branch starts here"
+        assert payload_story["passage_count"] == 2
+
 
 class TestStorySearch:
     @pytest.mark.asyncio
@@ -179,6 +219,11 @@ class TestStorySearch:
             # see if expected fragment is present in at least one of the titles
             titles = [s["title"] for s in results]
             assert any(title_fragment.lower() in t.lower() for t in titles)
+
+            first_result = results[0]
+            assert "first_passage_content" in first_result
+            assert "passage_count" in first_result
+            assert isinstance(first_result["passage_count"], int)
 
 
 class TestDeleteFunctions:

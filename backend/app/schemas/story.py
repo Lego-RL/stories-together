@@ -50,3 +50,5 @@ class StoryRead(StoryBase):
     creator_id: int
     creator_username: str
     created_at: datetime
+    first_passage_content: Optional[str] = None
+    passage_count: int = 0
