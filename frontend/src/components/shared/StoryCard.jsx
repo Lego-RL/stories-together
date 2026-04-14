@@ -28,6 +28,7 @@ export default function StoryCard({
     ? new Date(created_at).toLocaleString("en-US", {
         month: "numeric",
         day: "numeric",
+        year: "numeric",
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
@@ -74,7 +75,7 @@ export default function StoryCard({
             <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
               First Passage
             </p>
-            <p className="mt-2 text-sm text-stone-300 leading-relaxed">
+            <p className="mt-2 text-sm text-stone-300 leading-relaxed whitespace-pre-line">
               {buildPreview(first_passage_content)}
             </p>
           </div>

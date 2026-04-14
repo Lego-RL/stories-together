@@ -49,10 +49,11 @@ export default function ViewStory() {
             Created by {story?.creator_username || "Unknown"} on {story?.created_at ? new Date(story.created_at).toLocaleString('en-US', {
               month: 'numeric',
               day: 'numeric',
-              year: 'numeric', 
+              year: 'numeric',
               hour: 'numeric',
               minute: '2-digit',
               hour12: true
+              // No timeZone option: browser local time
             }) : "Unknown date"}
           </div>
         </header>
@@ -62,7 +63,7 @@ export default function ViewStory() {
             <div className="absolute -top-4 left-10 px-4 py-1 bg-amber-600 text-stone-950 text-xs font-black uppercase tracking-tighter">
                 Initial Passage
             </div>
-          <p className="text-xl text-stone-200 leading-relaxed font-serif italic">
+          <p className="text-xl text-stone-200 leading-relaxed font-serif italic whitespace-pre-line">
             "{rootPassage?.content}"
           </p>
         </section>
@@ -104,7 +105,7 @@ export default function ViewStory() {
                 key={child.id} 
                 className="group p-6 bg-stone-900/50 border border-stone-800 rounded-2xl hover:border-amber-500/30 transition-all cursor-pointer flex flex-col justify-between"
               >
-                <p className="text-sm text-stone-300 line-clamp-4 italic">
+                <p className="text-sm text-stone-300 line-clamp-4 italic whitespace-pre-line">
                   "{child.content}"
                 </p>
                 <div className="mt-4 pt-4 border-t border-stone-800 flex flex-col">
