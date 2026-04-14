@@ -13,20 +13,12 @@ const SEARCH_MIN_LENGTH = 3;
 export default function AllStories() {
   const { data: user, isLoading: userIsLoading } = useMe();
   const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const sentinelRef = useRef(null);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedSearch(searchInput.trim());
-    }, 300);
-
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
-
   const searchTooShort =
-    debouncedSearch.length > 0 && debouncedSearch.length < SEARCH_MIN_LENGTH;
-  const activeQuery = searchTooShort ? "" : debouncedSearch;
+    searchQuery.length > 0 && searchQuery.length < SEARCH_MIN_LENGTH;
+  const activeQuery = searchTooShort ? "" : searchQuery;
   const isSearchMode = activeQuery.length >= SEARCH_MIN_LENGTH;
 
   const {
@@ -36,6 +28,7 @@ export default function AllStories() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ["stories", "all", { q: activeQuery }],
     queryFn: async ({ pageParam }) => {
@@ -113,14 +106,50 @@ export default function AllStories() {
             <label htmlFor="story-search" className="block text-sm font-semibold text-stone-300">
               Search Stories
             </label>
-            <input
-              id="story-search"
-              type="text"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by title"
-              className="w-full rounded-lg border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 placeholder:text-stone-500 focus:border-amber-500 focus:outline-none"
-            />
+            <div className="relative flex items-center">
+              <input
+                id="story-search"
+                type="text"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setSearchQuery(searchInput.trim());
+                  }
+                }}
+                placeholder="Search by title"
+                className="w-full rounded-lg border border-stone-700 bg-stone-950 px-4 py-3 text-stone-100 placeholder:text-stone-500 focus:border-amber-500 focus:outline-none pr-16"
+                aria-label="Search stories by title"
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-lg text-sm font-bold shadow-lg shadow-amber-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 flex items-center justify-center min-w-[80px]"
+                onClick={() => setSearchQuery(searchInput.trim())}
+                aria-label="Search"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <svg className="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                ) : (
+                  <span>Search</span>
+                )}
+              </button>
+            </div>
 
             {searchInput.trim().length > 0 && searchInput.trim().length < SEARCH_MIN_LENGTH && (
               <p className="text-xs text-amber-300">
@@ -129,7 +158,7 @@ export default function AllStories() {
             )}
 
             <div className="rounded-lg border border-dashed border-stone-700 p-3 text-stone-500 text-sm">
-              Filters placeholder: sorting, creator filters, and content filters will live here.
+              Filters placeholder: sorting, creator filters, and content filters are planned.
             </div>
           </div>
 
