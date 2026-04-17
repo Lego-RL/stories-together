@@ -2,11 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
+import { useMe } from "../hooks/useAuth";
 import { countWords } from "../utils/wordCount";
+import SiteHeader from "../components/shared/Header";
+import SiteFooter from "../components/shared/Footer";
 
 export default function CreateStory() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: user, isLoading: userIsLoading } = useMe();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -38,109 +42,115 @@ export default function CreateStory() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 p-8 flex justify-center">
-      <div className="w-full max-w-2xl">
-        {/* navigate back */}
-        <button 
-          onClick={() => navigate(-1)}
-          className="mb-8 text-stone-500 hover:text-stone-300 flex items-center gap-2 text-sm transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Dashboard
-        </button>
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col">
+      <SiteHeader isLoading={userIsLoading} user={user} />
 
-        <header className="mb-10">
-          <h1 className="text-4xl font-black tracking-tight text-white">Start a new story</h1>
-          <p className="text-stone-500 mt-2">The sky is the limit unless it is not</p>
-        </header>
+      <main className="flex-1 p-8 flex justify-center">
+        <div className="w-full max-w-2xl">
+          {/* navigate back */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="mb-8 text-stone-500 hover:text-stone-300 flex items-center gap-2 text-sm transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+          </button>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* error msg */}
-          {mutation.isError && (
-            <div className="p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg text-sm">
-              {mutation.error?.message || "Failed to create story. Check your inputs."}
+          <header className="mb-10">
+            <h1 className="text-4xl font-black tracking-tight text-white">Start a new story</h1>
+            <p className="text-stone-500 mt-2">The sky is the limit unless it is not</p>
+          </header>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* error msg */}
+            {mutation.isError && (
+              <div className="p-4 bg-red-900/20 border border-red-900/50 text-red-400 rounded-lg text-sm">
+                {mutation.error?.message || "Failed to create story. Check your inputs."}
+              </div>
+            )}
+
+            {/* title input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Story Title</label>
+              <input
+                name="title"
+                type="text"
+                required
+                minLength={5}
+                maxLength={100}
+                placeholder="e.g., The Clockwork Heart"
+                value={formData.title}
+                onChange={handleChange}
+                className="bg-stone-900 border border-stone-800 p-3 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white"
+              />
             </div>
-          )}
 
-          {/* title input */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Story Title</label>
-            <input
-              name="title"
-              type="text"
-              required
-              minLength={5}
-              maxLength={100}
-              placeholder="e.g., The Clockwork Heart"
-              value={formData.title}
-              onChange={handleChange}
-              className="bg-stone-900 border border-stone-800 p-3 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white"
-            />
-          </div>
-
-          {/* description input */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Premise (Optional)</label>
-            <textarea
-              name="description"
-              rows={2}
-              minLength={20}
-              maxLength={500}
-              placeholder="Briefly describe the world or the goal of this story..."
-              value={formData.description}
-              onChange={handleChange}
-              className="bg-stone-900 border border-stone-800 p-3 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white resize-none"
-            />
-            <div className="flex justify-end mt-2">
-              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
-                {countWords(formData.description)} words
-              </p>
+            {/* description input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">Premise (Optional)</label>
+              <textarea
+                name="description"
+                rows={2}
+                minLength={20}
+                maxLength={500}
+                placeholder="Briefly describe the world or the goal of this story..."
+                value={formData.description}
+                onChange={handleChange}
+                className="bg-stone-900 border border-stone-800 p-3 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white resize-none"
+              />
+              <div className="flex justify-end mt-2">
+                <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
+                  {countWords(formData.description)} words
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* passage input */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">The Opening Hook</label>
-            <textarea
-              name="first_passage_content"
-              required
-              minLength={30}
-              rows={8}
-              placeholder="Write the very first passage. How does this story begin?"
-              value={formData.first_passage_content}
-              onChange={handleChange}
-              className="bg-stone-900 border border-stone-800 p-4 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white leading-relaxed"
-            />
-            <div className="flex justify-between mt-2">
-              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">Minimum 30 characters</p>
-              <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
-                {countWords(formData.first_passage_content)} words
-              </p>
+            {/* passage input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-bold text-stone-400 uppercase tracking-widest">The Opening Hook</label>
+              <textarea
+                name="first_passage_content"
+                required
+                minLength={30}
+                rows={8}
+                placeholder="Write the very first passage. How does this story begin?"
+                value={formData.first_passage_content}
+                onChange={handleChange}
+                className="bg-stone-900 border border-stone-800 p-4 rounded-lg focus:ring-2 focus:ring-amber-600 outline-none transition-all text-white leading-relaxed"
+              />
+              <div className="flex justify-between mt-2">
+                <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">Minimum 30 characters</p>
+                <p className="text-xs text-stone-600 uppercase font-bold tracking-tighter">
+                  {countWords(formData.first_passage_content)} words
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* buttons */}
-          <div className="pt-4 flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={mutation.isPending}
-              className="px-8 py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-800 disabled:text-stone-600 text-stone-950 font-bold rounded-lg transition-all shadow-lg shadow-amber-900/20"
-            >
-              {mutation.isPending ? "Publishing..." : "Publish Story"}
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              className="px-8 py-3 text-stone-500 hover:text-stone-300 font-bold transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+            {/* buttons */}
+            <div className="pt-4 flex items-center gap-4">
+              <button
+                type="submit"
+                disabled={mutation.isPending}
+                className="px-8 py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-800 disabled:text-stone-600 text-stone-950 font-bold rounded-lg transition-all shadow-lg shadow-amber-900/20"
+              >
+                {mutation.isPending ? "Publishing..." : "Publish Story"}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="px-8 py-3 text-stone-500 hover:text-stone-300 font-bold transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

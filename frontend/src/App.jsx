@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import CreateStory from "./pages/CreateStory";
@@ -12,6 +13,11 @@ import { useProactiveTokenRefresh } from "./hooks/useTokenRefresh";
 
 function App() {
   useProactiveTokenRefresh();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <Routes>
